@@ -1,0 +1,128 @@
+# ===============================
+# Global ignores for Windows/macOS
+# ===============================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# ===============================
+# Node-related (if you end up using React Native or Node-based tooling)
+# ===============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.env
+
+# ===============================
+# Android Studio / Gradle
+# ===============================
+.gradle/
+.idea/
+*.iml
+build/
+captures/
+local.properties
+.cxx/
+.externalNativeBuild/
+*.apk
+*.ap_
+
+# Keystore files (for signing APKs)
+*.jks
+*.keystore
+
+# NDK and CMake cache
+.cmake/
+cmake-build-*/
+
+# ===============================
+# Visual Studio / C#
+# ===============================
+## User-specific files
+.vscode/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build output
+[Bb]in/
+[Oo]bj/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+
+## ASP.NET files
+_AppStart.cshtml
+*_ViewStart.cshtml
+*.publish.xml
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+
+# Azure Deployment settings
+PublishProfiles/
+
+# ===============================
+# JetBrains IDEs (Rider, IntelliJ)
+# ===============================
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# ===============================
+# Flutter (if used later)
+# ===============================
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+
+# ===============================
+# Logs, coverage, and miscellaneous
+# ===============================
+*.log
+*.tlog
+*.coverage
+*.coveragexml
+*.TestResults.xml
+TestResult.xml
+*.testsettings
+*.vsmdi
+*.scc
+
+# ===============================
+# Miscellaneous
+# ===============================
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.tmp
+
+# Ignore secrets
+secrets.json
+config.json
+*.env
+.env.*
+
+# Custom tooling/output
+tools/
+output/

@@ -126,3 +126,20 @@ config.json
 # Custom tooling/output
 tools/
 output/
+
+
+# Android Studio Specific Stuff
+# Android Lint output
+lint/
+lint-results*.xml
+
+# Crash reports
+crashlytics-build.log
+
+# IDE auto-saves or sync files
+.idea/modules.xml
+.idea/workspace.xml
+
+# Firebase/Google config (if used)
+google-services.json
+

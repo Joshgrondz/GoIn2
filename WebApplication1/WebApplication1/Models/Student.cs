@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
 
-namespace WebApplication1.Models
+namespace WebApplication1.Models;
+
+public partial class Student
 {
-    public class Student
-    {
-        [Key]
-        public int ID { get; set; }
-        public String Name { get; set; }
-    }
+    public int Id { get; set; }
+
+    public string Name { get; set; } = null!;
 }

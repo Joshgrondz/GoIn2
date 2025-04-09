@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import org.json.JSONArray
 
 class MainActivity : AppCompatActivity() {
 
@@ -45,10 +46,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun testApiCall(): String? {
-        // TODO: Replace this with actual network call logic later
-        return "Sample result from API (NOT REAL, not yet implemented)"
-        // return null to simulate failure or no response
+        // Simulated API JSON response
+        val json = """
+        [
+          { "id": 1, "name": "Lucas" },
+          { "id": 2, "name": "Josh" },
+          { "id": 3, "name": "Eian" },
+          { "id": 4, "name": "Aiden" },
+          { "id": 5, "name": "Antonio" }
+        ]
+    """.trimIndent()
+
+        return try {
+            val names = JSONArray(json)
+            val result = StringBuilder()
+
+            for (i in 0 until names.length()) {
+                val student = names.getJSONObject(i)
+                result.append("${student.getString("name")}\n")
+            }
+
+            result.toString().trim()
+        } catch (e: Exception) {
+            "Failed to parse response"
+        }
     }
+
 
     fun startLocationService() {
         val intent = Intent(this, LocationService::class.java)

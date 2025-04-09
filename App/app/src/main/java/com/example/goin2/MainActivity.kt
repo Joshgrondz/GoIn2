@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
             val client = OkHttpClient()
 
             val request = Request.Builder()
-                .url("http://10.0.2.2:5017/api/Student")
+                .url("https://webapplication120250408230542-draxa5ckg5gabacc.canadacentral-01.azurewebsites.net/api/Student")
                 .addHeader("accept", "text/plain")
                 .build()
 

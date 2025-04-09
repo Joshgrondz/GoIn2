@@ -1,13 +1,44 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <!-- These are the buttons for the teacher and student,
+    currently just say "need implemented",in main activity -->
+    <Button
+        android:id="@+id/buttonTeacher"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Teacher" />
 
     <Button
-        android:id="@+id/api_button"
-        android:layout_width="wrap_content"
+        android:id="@+id/buttonStudent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Call API"
-        android:layout_centerInParent="true" />
-</RelativeLayout>
+        android:text="Student"
+        android:layout_marginTop="16dp" />
+
+    <!-- This is the button for the api call, and a little text box beneath -->
+    <Button
+        android:id="@+id/buttonApiCall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Try API Call"
+        android:layout_marginTop="24dp" />
+
+    <TextView
+        android:id="@+id/apiResultBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nothing received"
+        android:padding="16dp"
+        android:layout_marginTop="12dp"
+        android:background="@android:color/white"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:minHeight="64dp" />
+
+</LinearLayout>

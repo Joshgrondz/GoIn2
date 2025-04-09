@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -22,6 +23,7 @@ namespace WebApplication1.Controllers
 
         // GET: api/Students
         [HttpGet]
+        [SwaggerOperation(Summary = "Get All Students", Description = "Retrieves a list of all Students from the database.")]
         public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
             return await _context.Students.ToListAsync();
@@ -29,6 +31,7 @@ namespace WebApplication1.Controllers
 
         // GET: api/Students/5
         [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get A Student", Description = "Retrieves a Student from the database.")]
         public async Task<ActionResult<Student>> GetStudent(int id)
         {
             var student = await _context.Students.FindAsync(id);
@@ -44,6 +47,7 @@ namespace WebApplication1.Controllers
         // PUT: api/Students/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [SwaggerOperation(Summary = "Update a Student", Description = "Updates a student based on their student ID.")]
         public async Task<IActionResult> PutStudent(int id, Student student)
         {
             if (id != student.Id)
@@ -75,6 +79,7 @@ namespace WebApplication1.Controllers
         // POST: api/Students
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [SwaggerOperation(Summary = "Add a student", Description = "Adds a student to the database, pretty basic.")]
         public async Task<ActionResult<Student>> PostStudent(Student student)
         {
             _context.Students.Add(student);
@@ -85,6 +90,7 @@ namespace WebApplication1.Controllers
 
         // DELETE: api/Students/5
         [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Deletes a student", Description = "GET OUTA HERE.")]
         public async Task<IActionResult> DeleteStudent(int id)
         {
             var student = await _context.Students.FindAsync(id);

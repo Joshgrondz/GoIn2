@@ -8,6 +8,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.json.JSONArray
 
 class MainActivity : AppCompatActivity() {
@@ -37,40 +39,50 @@ class MainActivity : AppCompatActivity() {
         apiButton?.setOnClickListener {
             resultBox.text = "" // Clear previous result
 
-            // Simulate an API call — replace with real logic later
-            val simulatedResponse: String? = testApiCall()
+            Thread {
+                val simulatedResponse: String? = testApiCall()
 
-            resultBox.text = simulatedResponse ?: "Nothing received"
+                runOnUiThread {
+                    resultBox.text = simulatedResponse ?: "Nothing received"
+                }
+            }.start()
         }
 
     }
 
     private fun testApiCall(): String? {
-        // Simulated API JSON response
-        val json = """
-        [
-          { "id": 1, "name": "Lucas" },
-          { "id": 2, "name": "Josh" },
-          { "id": 3, "name": "Eian" },
-          { "id": 4, "name": "Aiden" },
-          { "id": 5, "name": "Antonio" }
-        ]
-    """.trimIndent()
-
         return try {
-            val names = JSONArray(json)
+            val client = OkHttpClient()
+
+            val request = Request.Builder()
+                .url("http://10.0.2.2:5017/api/Student")
+                .addHeader("accept", "text/plain")
+                .build()
+
+            val response = client.newCall(request).execute()
+
+            if (!response.isSuccessful) {
+                return "HTTP error: ${response.code}"
+            }
+
+            val bodyString = response.body?.string()
+            if (bodyString == null) return "Response body is null"
+
+            val jsonArray = JSONArray(bodyString)
             val result = StringBuilder()
 
-            for (i in 0 until names.length()) {
-                val student = names.getJSONObject(i)
-                result.append("${student.getString("name")}\n")
+            for (i in 0 until jsonArray.length()) {
+                val obj = jsonArray.getJSONObject(i)
+                result.append("${obj.getString("name")}\n")
             }
 
             result.toString().trim()
         } catch (e: Exception) {
-            "Failed to parse response"
+            "Exception: ${e::class.simpleName} - ${e.message ?: "No message"}"
         }
     }
+
+
 
 
     fun startLocationService() {

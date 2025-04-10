@@ -21,6 +21,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GoIn2">
 
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCCktqbp8hutj7fqDvnwcFranSeMW00i0g" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

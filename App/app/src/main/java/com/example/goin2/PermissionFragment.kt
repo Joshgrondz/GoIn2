@@ -18,21 +18,10 @@ import androidx.fragment.app.Fragment
 
 class PermissionFragment : Fragment() {
 
-    private lateinit var callback: () -> Unit
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is MainActivity) {
-            callback = context::startLocationService
-        }
-    }
-
     // 1. Request POST_NOTIFICATIONS (Android 13+)
     private val notificationRequest = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        requestFineLocation() // always continue regardless of grant result
-    }
+    ) { requestFineLocation() }
 
     // 2. Request ACCESS_FINE_LOCATION
     private val fineRequest = registerForActivityResult(
@@ -50,7 +39,6 @@ class PermissionFragment : Fragment() {
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
-            callback()
             parentFragmentManager.beginTransaction().remove(this).commit()
         } else {
             showSettings()
@@ -102,7 +90,6 @@ class PermissionFragment : Fragment() {
         ) {
             backgroundRequest.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         } else {
-            callback()
             parentFragmentManager.beginTransaction().remove(this).commit()
         }
     }

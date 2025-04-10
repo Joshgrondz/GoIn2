@@ -1,0 +1,55 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <Button
+        android:id="@+id/buttonApiCall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Try API Call" />
+
+    <TextView
+        android:id="@+id/apiResultBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nothing received"
+        android:padding="16dp"
+        android:layout_marginTop="12dp"
+        android:background="@android:color/white"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:minHeight="64dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/buttonShowDeviceLocation"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Show Current Location" />
+
+        <Button
+            android:id="@+id/buttonShowServerLocation"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Show Server Location"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_marginTop="12dp" />
+</LinearLayout>

@@ -35,6 +35,10 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".StudentLoginActivity" android:exported="false" />
+        <activity android:name=".StudentActivity" android:exported="false" />
+
+
         <service
             android:name=".LocationService"
             android:enabled="true"

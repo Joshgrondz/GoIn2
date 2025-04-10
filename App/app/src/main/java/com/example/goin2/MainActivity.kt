@@ -17,6 +17,13 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import androidx.core.widget.doAfterTextChanged
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.Priority
+import android.os.Looper
+import android.Manifest
+import android.content.pm.PackageManager
 
 
 class MainActivity : AppCompatActivity() {
@@ -79,21 +86,64 @@ class MainActivity : AppCompatActivity() {
         val deviceButton = findViewById<Button>(R.id.buttonShowDeviceLocation)
         val serverButton = findViewById<Button>(R.id.buttonShowServerLocation)
 
-        deviceButton.setOnClickListener @androidx.annotation.RequiresPermission(allOf = [android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION]) {
+        deviceButton.setOnClickListener {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Location permissions are not granted", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    val latLng = LatLng(location.latitude, location.longitude)
+
+            // First try to use last known location
+            fusedLocationClient.lastLocation.addOnSuccessListener { lastLocation ->
+                if (lastLocation != null) {
+                    val latLng = LatLng(lastLocation.latitude, lastLocation.longitude)
                     googleMap?.apply {
                         clear()
                         addMarker(MarkerOptions().position(latLng).title("Your Location"))
                         moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
                     }
                 } else {
-                    Toast.makeText(this, "Location not available", Toast.LENGTH_SHORT).show()
+                    Log.d("MainActivity", "lastLocation was null — polling for fresh location")
+
+                    // Build location request
+                    val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 0).apply {
+                        setMinUpdateIntervalMillis(0)
+                        setMaxUpdateDelayMillis(0)
+                        setMaxUpdates(1)
+                    }.build()
+
+                    // Build callback
+                    val callback = object : LocationCallback() {
+                        override fun onLocationResult(result: LocationResult) {
+                            val location = result.lastLocation
+                            if (location != null) {
+                                val latLng = LatLng(location.latitude, location.longitude)
+                                googleMap?.apply {
+                                    clear()
+                                    addMarker(MarkerOptions().position(latLng).title("Your Location"))
+                                    moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                                }
+                            } else {
+                                Toast.makeText(this@MainActivity, "Still couldn't get location", Toast.LENGTH_SHORT).show()
+                            }
+                            fusedLocationClient.removeLocationUpdates(this)
+                        }
+                    }
+
+                    // Make request
+                    fusedLocationClient.requestLocationUpdates(
+                        request,
+                        callback,
+                        Looper.getMainLooper()
+                    )
                 }
             }
         }
+
+
+
 
         serverButton.setOnClickListener {
             ApiClient.getLastKnownLocation(studentId = MainActivity.currentStudentId) { lat, lng ->

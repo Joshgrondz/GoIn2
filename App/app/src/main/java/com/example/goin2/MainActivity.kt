@@ -2,17 +2,29 @@ package com.example.goin2
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.json.JSONArray
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import androidx.core.widget.doAfterTextChanged
+
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        var currentStudentId: Int = 7
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,55 +45,69 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Student mode (to be implemented)", Toast.LENGTH_SHORT).show()
         }
 
+        val studentIdInput = findViewById<EditText>(R.id.studentIdInput)
+
+        studentIdInput.doAfterTextChanged {
+            val input = it?.toString()?.trim()
+            currentStudentId = input?.toIntOrNull() ?: 7
+            Log.d("MainActivity", "Student ID set to $currentStudentId")
+        }
+
+
         val apiButton = findViewById<Button>(R.id.buttonApiCall)
         val resultBox = findViewById<TextView>(R.id.apiResultBox)
 
         apiButton?.setOnClickListener {
             resultBox.text = "" // Clear previous result
 
-            Thread {
-                val simulatedResponse: String? = testApiCall()
+            ApiClient.getStudents { result ->
+                resultBox.text = result
+            }
+        }
 
-                runOnUiThread {
-                    resultBox.text = simulatedResponse ?: "Nothing received"
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.mapFragment) as? SupportMapFragment
+
+        var googleMap: GoogleMap? = null
+
+        mapFragment?.getMapAsync { map ->
+            googleMap = map
+            map.uiSettings.isZoomControlsEnabled = true
+        }
+
+
+        val deviceButton = findViewById<Button>(R.id.buttonShowDeviceLocation)
+        val serverButton = findViewById<Button>(R.id.buttonShowServerLocation)
+
+        deviceButton.setOnClickListener @androidx.annotation.RequiresPermission(allOf = [android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION]) {
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    val latLng = LatLng(location.latitude, location.longitude)
+                    googleMap?.apply {
+                        clear()
+                        addMarker(MarkerOptions().position(latLng).title("Your Location"))
+                        moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                    }
+                } else {
+                    Toast.makeText(this, "Location not available", Toast.LENGTH_SHORT).show()
                 }
-            }.start()
+            }
         }
 
-    }
-
-    private fun testApiCall(): String? {
-        return try {
-            val client = OkHttpClient()
-
-            val request = Request.Builder()
-                .url("https://webapplication120250408230542-draxa5ckg5gabacc.canadacentral-01.azurewebsites.net/api/Student")
-                .addHeader("accept", "text/plain")
-                .build()
-
-            val response = client.newCall(request).execute()
-
-            if (!response.isSuccessful) {
-                return "HTTP error: ${response.code}"
+        serverButton.setOnClickListener {
+            ApiClient.getLastKnownLocation(studentId = MainActivity.currentStudentId) { lat, lng ->
+                val latLng = LatLng(lat, lng)
+                googleMap?.apply {
+                    clear()
+                    addMarker(MarkerOptions().position(latLng).title("Last Server Location"))
+                    moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                }
             }
-
-            val bodyString = response.body?.string()
-            if (bodyString == null) return "Response body is null"
-
-            val jsonArray = JSONArray(bodyString)
-            val result = StringBuilder()
-
-            for (i in 0 until jsonArray.length()) {
-                val obj = jsonArray.getJSONObject(i)
-                result.append("${obj.getString("name")}\n")
-            }
-
-            result.toString().trim()
-        } catch (e: Exception) {
-            "Exception: ${e::class.simpleName} - ${e.message ?: "No message"}"
         }
-    }
 
+
+    }
 
 
 

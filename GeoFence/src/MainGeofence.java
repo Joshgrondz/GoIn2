@@ -9,9 +9,9 @@ public class MainGeofence extends Geofence {
         this.RadiusFeet = RadiusFeet;
     }
 
-    public boolean WithinGeofence(User Student){
-        float userLat = Student.Latitude;
-        float userLong = Student.Longitude;
+    public boolean WithinGeofence(User User){
+        float userLat = User.Latitude;
+        float userLong = User.Longitude;
 
         return calculateDistance(CenterLatitude, CenterLongitude, userLat, userLong) < RadiusFeet;
     }

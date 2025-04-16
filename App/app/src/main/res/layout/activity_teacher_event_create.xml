@@ -1,0 +1,106 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Toolbar (always visible) -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:paddingTop="20dp"
+        android:titleTextColor="@android:color/white" />
+
+    <!-- Scrollable Event Creation UI (hidden by default) -->
+    <ScrollView
+        android:id="@+id/createEventContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Button to open full-screen map -->
+            <Button
+                android:id="@+id/buttonSetMapArea"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Set Location and Boundary"
+                android:layout_marginTop="16dp" />
+
+            <!-- Distance from teacher -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Max Distance from Teacher (2–50m)"
+                android:layout_marginTop="24dp" />
+
+            <SeekBar
+                android:id="@+id/sliderDistanceTeacher"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="48" />
+
+            <EditText
+                android:id="@+id/inputDistanceTeacher"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:hint="Distance from teacher (m)" />
+
+            <!-- Distance between groups -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Max Distance Between Goin2 Groups (2–10m)"
+                android:layout_marginTop="24dp" />
+
+            <SeekBar
+                android:id="@+id/sliderDistanceGroups"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="8" />
+
+            <EditText
+                android:id="@+id/inputDistanceGroups"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:hint="Distance between groups (m)" />
+
+            <!-- Class checkboxes -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Assign Classes"
+                android:layout_marginTop="24dp" />
+
+            <CheckBox
+                android:id="@+id/checkboxClassOne"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Class One" />
+
+            <CheckBox
+                android:id="@+id/checkboxClassTwo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Class Two" />
+
+            <!-- Create button -->
+            <Button
+                android:id="@+id/buttonCreateEvent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Create Event"
+                android:enabled="false"
+                android:layout_marginTop="24dp" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

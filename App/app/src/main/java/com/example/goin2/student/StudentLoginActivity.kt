@@ -1,4 +1,4 @@
-package com.example.goin2
+package com.example.goin2.student
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,6 +6,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.goin2.API_and_location.ApiClient
+import com.example.goin2.R
 
 class StudentLoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

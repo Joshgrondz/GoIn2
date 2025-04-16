@@ -1,4 +1,4 @@
-package com.example.goin2
+package com.example.goin2.API_and_location
 
 import android.Manifest
 import android.app.Notification
@@ -12,6 +12,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
+import com.example.goin2.main.MainActivity
 import com.google.android.gms.location.*
 
 class LocationService : Service() {

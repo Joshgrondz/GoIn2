@@ -1,6 +1,8 @@
+package org.example;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Collections; // For synchronizedList
 
 public class EventGeofenceController {
     public User Chaperone;

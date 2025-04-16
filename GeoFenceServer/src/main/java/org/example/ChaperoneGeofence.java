@@ -1,3 +1,5 @@
+package org.example;
+
 public class ChaperoneGeofence extends Geofence {
     public User Chaperone;
     public float RadiusFeet;

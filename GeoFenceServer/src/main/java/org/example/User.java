@@ -1,3 +1,5 @@
+package org.example;
+
 public class User {
     public int ID;
     public String FirstName;

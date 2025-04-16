@@ -1,3 +1,5 @@
+package org.example;
+
 public class GoIn2GroupGeofence extends Geofence {
     public User student1;
     public User student2;

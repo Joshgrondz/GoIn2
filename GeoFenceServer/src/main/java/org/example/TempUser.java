@@ -1,3 +1,5 @@
+package org.example;
+
 public class TempUser {
     public int ID;
     public String FirstName;

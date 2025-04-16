@@ -1,3 +1,5 @@
+package org.example;
+
 public class MainGeofence extends Geofence {
     public float CenterLatitude;
     public float CenterLongitude;

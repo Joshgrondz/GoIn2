@@ -1,3 +1,5 @@
+package org.example;
+
 public class Geofence {
     public static final double EARTH_RADIUS_FEET = 20902231;
 

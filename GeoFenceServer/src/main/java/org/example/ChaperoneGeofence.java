@@ -1,3 +1,5 @@
+package org.example;
+
 public class ChaperoneGeofence extends Geofence {
     public User Chaperone;
     public float RadiusFeet;
@@ -5,6 +7,12 @@ public class ChaperoneGeofence extends Geofence {
     public ChaperoneGeofence(User Chaperone, float RadiusFeet ) {
         this.Chaperone = Chaperone;
         this.RadiusFeet = RadiusFeet;
+    }
+
+    public void updateChaperone(User newChaperone){
+        synchronized (Chaperone) {
+            Chaperone = newChaperone;
+        }
     }
 
     public boolean WithinChaperoneGeofence(User Student){

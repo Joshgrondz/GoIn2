@@ -1,3 +1,5 @@
+package org.example;
+
 public class GoIn2Group {
     public User Student1;
     public User Student2;

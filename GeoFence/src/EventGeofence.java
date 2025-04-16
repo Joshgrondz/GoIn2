@@ -65,9 +65,8 @@ public class EventGeofence {
     }
 
     public boolean checkChaperoneGeofence() {
-        boolean flag = true;
-        for ()
+        boolean flag = true
     }
-
+    
 
 }

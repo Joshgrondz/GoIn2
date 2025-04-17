@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Dto;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -75,12 +76,19 @@ namespace WebApplication1.Controllers
         // POST: api/Log
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Log>> PostLog(Log log)
+        public async Task<ActionResult<Log>> PostLog(LogCreateDto dto)
         {
+            var log = new Log
+            {
+                Eventid = dto.Eventid,
+                LogDescription = dto.LogDescription,
+                Timestamp = dto.Timestamp
+            };
+
             _context.Logs.Add(log);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetLog", new { id = log.Id }, log);
+            return CreatedAtAction(nameof(GetLog), new { id = log.Id }, log);
         }
 
         // DELETE: api/Log/5

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Dto;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -75,12 +76,25 @@ namespace WebApplication1.Controllers
         // POST: api/Location
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Location>> PostLocation(Location location)
+        public async Task<ActionResult<Location>> PostLocation(LocationCreateDto dto)
         {
+            var location = new Location
+            {
+                Userid = dto.Userid,
+                Latitude = dto.Latitude,
+                Longitude = dto.Longitude,
+                LocAccuracy = dto.LocAccuracy,
+                LocAltitude = dto.LocAltitude,
+                LocSpeed = dto.LocSpeed,
+                LocBearing = dto.LocBearing,
+                LocProvider = dto.LocProvider,
+                TimestampMs = dto.TimestampMs
+            };
+
             _context.Locations.Add(location);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetLocation", new { id = location.Id }, location);
+            return CreatedAtAction(nameof(GetLocation), new { id = location.Id }, location);
         }
 
         // DELETE: api/Location/5

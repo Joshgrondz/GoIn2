@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Dto;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -75,12 +76,21 @@ namespace WebApplication1.Controllers
         // POST: api/GeoFence
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<GeoFence>> PostGeoFence(GeoFence geoFence)
+        public async Task<ActionResult<GeoFence>> PostGeoFence(GeoFenceCreateDto dto)
         {
+            var geoFence = new GeoFence
+            {
+                EventRadius = dto.EventRadius,
+                TeacherRadius = dto.TeacherRadius,
+                PairDistance = dto.PairDistance,
+                Latitude = dto.Latitude,
+                Longitude = dto.Longitude
+            };
+
             _context.GeoFences.Add(geoFence);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetGeoFence", new { id = geoFence.Id }, geoFence);
+            return CreatedAtAction(nameof(GetGeoFence), new { id = geoFence.Id }, geoFence);
         }
 
         // DELETE: api/GeoFence/5

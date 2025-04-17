@@ -107,7 +107,7 @@ namespace WebApplication1.Controllers
                 }
             }
 
-            var result = new TeacherProfileReadDto
+            var result = new TeacherProfileCreateDto
             {
                 Id = teacherProfile.Id
             };

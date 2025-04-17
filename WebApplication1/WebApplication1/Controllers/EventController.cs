@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Dto;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -75,12 +76,22 @@ namespace WebApplication1.Controllers
         // POST: api/Event
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Event>> PostEvent(Event @event)
+        public async Task<ActionResult<Event>> PostEvent(EventCreateDto dto)
         {
-            _context.Events.Add(@event);
+            var eventEntity = new Event
+            {
+                EventName = dto.EventName,
+                EventDate = dto.EventDate,
+                EventLocation = dto.EventLocation,
+                Status = dto.Status,
+                Teacherid = dto.Teacherid,
+                Geofenceid = dto.Geofenceid
+            };
+
+            _context.Events.Add(eventEntity);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetEvent", new { id = @event.Id }, @event);
+            return CreatedAtAction(nameof(GetEvent), new { id = eventEntity.Id }, eventEntity);
         }
 
         // DELETE: api/Event/5

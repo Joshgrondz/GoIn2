@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Dto;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -73,11 +74,23 @@ namespace WebApplication1.Controllers
         }
 
         // POST: api/TeacherProfile
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<TeacherProfile>> PostTeacherProfile(TeacherProfile teacherProfile)
+        public async Task<ActionResult<TeacherProfileCreateDto>> PostTeacherProfile(TeacherProfileCreateDto dto)
         {
+            // Make sure the User exists first (optional check)
+            var userExists = await _context.Users.AnyAsync(u => u.Id == dto.Id);
+            if (!userExists)
+            {
+                return BadRequest($"No User found with ID {dto.Id}");
+            }
+
+            var teacherProfile = new TeacherProfile
+            {
+                Id = dto.Id
+            };
+
             _context.TeacherProfiles.Add(teacherProfile);
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -94,7 +107,12 @@ namespace WebApplication1.Controllers
                 }
             }
 
-            return CreatedAtAction("GetTeacherProfile", new { id = teacherProfile.Id }, teacherProfile);
+            var result = new TeacherProfileReadDto
+            {
+                Id = teacherProfile.Id
+            };
+
+            return CreatedAtAction(nameof(GetTeacherProfile), new { id = result.Id }, result);
         }
 
         // DELETE: api/TeacherProfile/5

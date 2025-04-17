@@ -1,8 +1,13 @@
 package org.example;
 
+import org.json.JSONObject;
+
+import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+//Remove syncronized from methods
 
 public class EventGeofenceController {
     public User Chaperone;
@@ -16,7 +21,7 @@ public class EventGeofenceController {
     public List<User> StudentsOutsideChaperone;
 
     // Establish Event's Geofence
-    public EventGeofenceController(User Chaperone, Float EventCenterLatitude, Float EventCenterLongitude, Float EventRadiusFeet, float ChaperoneDistance, float GoIn2Distance) {
+    public EventGeofenceController(User Chaperone, float EventCenterLatitude, float EventCenterLongitude, float EventRadiusFeet, float ChaperoneDistance, float GoIn2Distance) {
         this.Chaperone = Chaperone;
         Geofence = new MainGeofence(EventCenterLatitude, EventCenterLongitude, EventRadiusFeet);
         ChaperoneGeofence = new ChaperoneGeofence(Chaperone, ChaperoneDistance);
@@ -106,4 +111,48 @@ public class EventGeofenceController {
     public List<User> getStudentsOutsideChaperone() {
         return StudentsOutsideChaperone;
     }
+
+
+    public static EventGeofenceController CreateGeoFenceController (int EventID, HttpClient client){
+        //Get Event information
+        String EventAccess = "/api/Event/" + EventID;
+        JSONObject Event;
+        try {
+            Event = APICalls.makeGetRequestSingleItem(client, EventAccess);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        if (Event != null){
+            System.out.println("Event Successfully Retrieved");
+        }
+        else{
+            System.exit(420);
+        }
+
+        //Get Event Geofence
+        int GeofenceID = Event.getInt("geofenceid");
+        String GeofenceAccess = "/api/GeoFence/" + GeofenceID;
+        JSONObject geofence;
+        try {
+            geofence = APICalls.makeGetRequestSingleItem(client, GeofenceAccess);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        if (geofence != null){
+            System.out.println("Geofence Successfully Retrieved");
+        }
+        else{
+            System.exit(69);
+        }
+
+
+        //Temp Chaperone User    MAKE SURE TO REPLACE WITH GET OF CHAPERONE
+        User Chaperone = new User(5, "Josh","Grondz",0,0);
+
+        return new EventGeofenceController(Chaperone, geofence.getFloat("latitude"), geofence.getFloat("longitude"), geofence.getFloat("eventRadius"), geofence.getFloat("teacherRadius"),geofence.getFloat("pairDistance"));
+
+    }
+
 }

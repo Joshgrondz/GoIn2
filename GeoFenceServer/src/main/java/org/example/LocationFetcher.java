@@ -1,5 +1,5 @@
 package org.example;
-
+/*
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -45,31 +45,9 @@ public class LocationFetcher implements Runnable {
 
     }
 
-    private static void makeGetRequest(HttpClient client, String endpoint) throws Exception {
-        URI requestUri = URI.create(BASE_URL + endpoint); // Combine base URL and endpoint
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(requestUri)
-                .GET()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        System.out.println("\nGET Request to: " + requestUri);
-        System.out.println("Status Code: " + response.statusCode());
-        System.out.println("Response Body:\n" + response.body());
-
-        // Parse JSON (example)
-        if (response.statusCode() == 200) {
-            if (response.body().startsWith("[")) { // Check if it's a JSON array
-                JSONArray jsonArray = new JSONArray(response.body());
-                System.out.println("\nFirst item in array: " + jsonArray.getJSONObject(0).toString());
-            } else if (response.body().startsWith("{")) { // Check if it's a JSON object
-                JSONObject jsonObject = new JSONObject(response.body());
-                System.out.println("\nTitle: " + jsonObject.getString("title"));
-            }
-        }
-    }
 
 
 }
+
+ */

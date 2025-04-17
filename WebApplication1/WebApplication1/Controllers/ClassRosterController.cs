@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Dto;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -75,12 +76,18 @@ namespace WebApplication1.Controllers
         // POST: api/ClassRoster
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ClassRoster>> PostClassRoster(ClassRoster classRoster)
+        public async Task<ActionResult<ClassRoster>> PostClassRoster(ClassRosterCreateDto dto)
         {
-            _context.ClassRosters.Add(classRoster);
+            var roster = new ClassRoster
+            {
+                Classid = dto.Classid,
+                Studentid = dto.Studentid
+            };
+
+            _context.ClassRosters.Add(roster);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetClassRoster", new { id = classRoster.Id }, classRoster);
+            return CreatedAtAction(nameof(GetClassRoster), new { id = roster.Id }, roster);
         }
 
         // DELETE: api/ClassRoster/5

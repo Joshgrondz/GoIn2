@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Dto;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -75,12 +76,20 @@ namespace WebApplication1.Controllers
         // POST: api/Pair
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Pair>> PostPair(Pair pair)
+        public async Task<ActionResult<Pair>> PostPair(PairCreateDto dto)
         {
+            var pair = new Pair
+            {
+                Student1id = dto.Student1id,
+                Student2id = dto.Student2id,
+                Eventid = dto.Eventid,
+                Status = dto.Status
+            };
+
             _context.Pairs.Add(pair);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPair", new { id = pair.Id }, pair);
+            return CreatedAtAction(nameof(GetPair), new { id = pair.Id }, pair);
         }
 
         // DELETE: api/Pair/5

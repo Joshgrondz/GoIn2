@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
+using WebApplication1.Dto;
 
 namespace WebApplication1.Controllers
 {
@@ -75,13 +76,21 @@ namespace WebApplication1.Controllers
         // POST: api/User
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<User>> PostUser(UserCreateDto dto)
         {
+            var user = new User
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                UserType = dto.UserType
+            };
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
+
 
         // DELETE: api/User/5
         [HttpDelete("{id}")]

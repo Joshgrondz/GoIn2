@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Dto;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -75,12 +76,21 @@ namespace WebApplication1.Controllers
         // POST: api/Notification
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Notification>> PostNotification(Notification notification)
+        public async Task<ActionResult<Notification>> PostNotification(NotificationCreateDto dto)
         {
+            var notification = new Notification
+            {
+                Userid = dto.Userid,
+                Eventid = dto.Eventid,
+                NotificationDescription = dto.NotificationDescription,
+                NotificationTimestamp = dto.NotificationTimestamp,
+                Sent = dto.Sent
+            };
+
             _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetNotification", new { id = notification.Id }, notification);
+            return CreatedAtAction(nameof(GetNotification), new { id = notification.Id }, notification);
         }
 
         // DELETE: api/Notification/5

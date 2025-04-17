@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Dto;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -74,13 +75,20 @@ namespace WebApplication1.Controllers
 
         // POST: api/ClassEvent
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPost]
-        public async Task<ActionResult<ClassEvent>> PostClassEvent(ClassEvent classEvent)
+        public async Task<ActionResult<ClassEvent>> PostClassEvent(ClassEventCreateDto dto)
         {
+            var classEvent = new ClassEvent
+            {
+                Classid = dto.Classid,
+                Eventid = dto.Eventid
+            };
+
             _context.ClassEvents.Add(classEvent);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetClassEvent", new { id = classEvent.Id }, classEvent);
+            return CreatedAtAction(nameof(GetClassEvent), new { id = classEvent.Id }, classEvent);
         }
 
         // DELETE: api/ClassEvent/5

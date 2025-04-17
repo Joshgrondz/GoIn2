@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
+using WebApplication1.Dto;
 
 namespace WebApplication1.Controllers
 {
@@ -75,12 +76,18 @@ namespace WebApplication1.Controllers
         // POST: api/Class
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Class>> PostClass(Class @class)
+        public async Task<ActionResult<Class>> PostClass(ClassCreateDto dto)
         {
-            _context.Classes.Add(@class);
+            var classEntity = new Class
+            {
+                Teacherid = dto.Teacherid,
+                ClassName = dto.ClassName
+            };
+
+            _context.Classes.Add(classEntity);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetClass", new { id = @class.Id }, @class);
+            return CreatedAtAction(nameof(GetClass), new { id = classEntity.Id }, classEntity);
         }
 
         // DELETE: api/Class/5

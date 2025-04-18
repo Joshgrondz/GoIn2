@@ -14,4 +14,16 @@ public class User {
         this.Latitude = Latitude;
         this.Longitude = Longitude;
     }
+
+    public int getID(){
+        return ID;
+    }
+
+    public String getFirstName() {
+        return FirstName;
+    }
+
+    public String getLastName() {
+        return LastName;
+    }
 }

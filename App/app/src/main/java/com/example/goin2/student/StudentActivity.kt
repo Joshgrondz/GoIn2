@@ -1,4 +1,4 @@
-package com.example.goin2
+package com.example.goin2.student
 
 import android.Manifest
 import android.content.Intent
@@ -10,6 +10,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.example.goin2.API_and_location.ApiClient
+import com.example.goin2.API_and_location.LocationService
+import com.example.goin2.R
+import com.example.goin2.main.MainActivity
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap

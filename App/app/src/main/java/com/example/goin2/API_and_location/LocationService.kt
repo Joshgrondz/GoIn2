@@ -12,7 +12,6 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
-import com.example.goin2.main.MainActivity
 import com.google.android.gms.location.*
 
 class LocationService : Service() {
@@ -20,11 +19,23 @@ class LocationService : Service() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
 
+    private var userId: Int = -1
+    private var userType: String = "unknown"
+
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    override fun onCreate() {
-        super.onCreate()
-        startForeground(1, createNotification())
-        beginLocationTracking()
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        userId = intent?.getIntExtra("userId", -1) ?: -1
+        userType = intent?.getStringExtra("userType") ?: "unknown"
+
+        if (userId != -1 && (userType == "student" || userType == "teacher")) {
+            startForeground(1, createNotification())
+            beginLocationTracking()
+        } else {
+            Log.e("LocationService", "Invalid userId or userType, stopping service.")
+            stopSelf()
+        }
+
+        return START_STICKY
     }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
@@ -33,7 +44,7 @@ class LocationService : Service() {
 
         val locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
-            60_000L // every 60 seconds
+            20_000L // every 20 seconds
         ).build()
 
         locationCallback = object : LocationCallback() {
@@ -41,15 +52,21 @@ class LocationService : Service() {
                 val location = result.lastLocation ?: return
 
                 val payload = LocationPayload(
+                    id = 0,
+                    userid = userId,
                     latitude = location.latitude,
                     longitude = location.longitude,
-                    accuracy = location.accuracy,
-                    timestamp = location.time, // in ms
-                    provider = location.provider ?: "unknown"
+                    locAccuracy = location.accuracy,
+                    locAltitude = location.altitude,
+                    locSpeed = location.speed,
+                    locBearing = location.bearing,
+                    locProvider = location.provider ?: "unknown",
+                    timestampMs = location.time,
+                    user = userType
                 )
 
                 Log.d("LocationService", "Sending location to server: $payload")
-                ApiClient.sendLocation(payload, studentId = MainActivity.currentStudentId)
+                ApiClient.sendLocation(payload)
             }
         }
 
@@ -75,7 +92,7 @@ class LocationService : Service() {
 
         return NotificationCompat.Builder(this, channelId)
             .setContentTitle("Tracking Active")
-            .setContentText("Location is being sent every 60 seconds.")
+            .setContentText("Location is being sent every 20 seconds.")
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
             .setOngoing(true)
             .build()

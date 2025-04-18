@@ -1,5 +1,6 @@
 package com.example.goin2.main
 
+import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -12,6 +13,10 @@ import com.example.goin2.API_and_location.ApiClient
 import com.example.goin2.R
 import com.example.goin2.student.StudentLoginActivity
 import com.example.goin2.teacher.TeacherLoginActivity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 
 class MainActivity : AppCompatActivity() {
 
@@ -55,5 +60,18 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, TeacherLoginActivity::class.java)
             startActivity(intent)
         }
+
+        // Create notification channel for Android 8+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "main_notifications",
+                "Main Notifications",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.createNotificationChannel(channel)
+        }
+
     }
+
 }

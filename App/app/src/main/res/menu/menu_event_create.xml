@@ -1,7 +1,8 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_create_event"
         android:title="Create Event"
         android:icon="@android:drawable/ic_input_add"
-        android:showAsAction="always" />
+        app:showAsAction="always" />
 </menu>

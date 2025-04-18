@@ -23,23 +23,49 @@ namespace WebApplication1.Controllers
 
         // GET: api/Location
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Location>>> GetLocations()
+        public async Task<ActionResult<IEnumerable<LocationReadDto>>> GetLocations()
         {
-            return await _context.Locations.ToListAsync();
+            return await _context.Locations
+                .Select(l => new LocationReadDto
+                {
+                    Id = l.Id,
+                    Userid = l.Userid,
+                    Latitude = l.Latitude,
+                    Longitude = l.Longitude,
+                    LocAccuracy = l.LocAccuracy,
+                    LocAltitude = l.LocAltitude,
+                    LocSpeed = l.LocSpeed,
+                    LocBearing = l.LocBearing,
+                    LocProvider = l.LocProvider,
+                    TimestampMs = l.TimestampMs
+                })
+                .ToListAsync();
         }
 
         // GET: api/Location/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Location>> GetLocation(int id)
+        public async Task<ActionResult<LocationReadDto>> GetLocation(int id)
         {
-            var location = await _context.Locations.FindAsync(id);
+            var l = await _context.Locations.FindAsync(id);
 
-            if (location == null)
+            if (l == null)
             {
                 return NotFound();
             }
 
-            return location;
+            return new LocationReadDto
+            {
+                Id = l.Id,
+                Userid = l.Userid,
+                Latitude = l.Latitude,
+                Longitude = l.Longitude,
+                LocAccuracy = l.LocAccuracy,
+                LocAltitude = l.LocAltitude,
+                LocSpeed = l.LocSpeed,
+                LocBearing = l.LocBearing,
+                LocProvider = l.LocProvider,
+                TimestampMs = l.TimestampMs
+            };
         }
 
         // PUT: api/Location/5
@@ -74,9 +100,8 @@ namespace WebApplication1.Controllers
         }
 
         // POST: api/Location
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Location>> PostLocation(LocationCreateDto dto)
+        public async Task<ActionResult<LocationReadDto>> PostLocation(LocationCreateDto dto)
         {
             var location = new Location
             {
@@ -94,7 +119,21 @@ namespace WebApplication1.Controllers
             _context.Locations.Add(location);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetLocation), new { id = location.Id }, location);
+            var result = new LocationReadDto
+            {
+                Id = location.Id,
+                Userid = location.Userid,
+                Latitude = location.Latitude,
+                Longitude = location.Longitude,
+                LocAccuracy = location.LocAccuracy,
+                LocAltitude = location.LocAltitude,
+                LocSpeed = location.LocSpeed,
+                LocBearing = location.LocBearing,
+                LocProvider = location.LocProvider,
+                TimestampMs = location.TimestampMs
+            };
+
+            return CreatedAtAction(nameof(GetLocation), new { id = result.Id }, result);
         }
 
         // DELETE: api/Location/5

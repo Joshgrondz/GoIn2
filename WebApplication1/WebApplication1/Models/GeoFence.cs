@@ -7,11 +7,11 @@ public partial class GeoFence
 {
     public int Id { get; set; }
 
-    public int? EventRadius { get; set; }
+    public int EventRadius { get; set; }
 
-    public int? TeacherRadius { get; set; }
+    public int TeacherRadius { get; set; }
 
-    public double? PairDistance { get; set; }
+    public double PairDistance { get; set; }
 
     public double Latitude { get; set; }
 

@@ -23,14 +23,22 @@ namespace WebApplication1.Controllers
 
         // GET: api/Log
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Log>>> GetLogs()
+        public async Task<ActionResult<IEnumerable<LogReadDto>>> GetLogs()
         {
-            return await _context.Logs.ToListAsync();
+            return await _context.Logs
+                .Select(log => new LogReadDto
+                {
+                    Id = log.Id,
+                    Eventid = log.Eventid,
+                    LogDescription = log.LogDescription,
+                    Timestamp = log.Timestamp
+                })
+                .ToListAsync();
         }
 
         // GET: api/Log/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Log>> GetLog(int id)
+        public async Task<ActionResult<LogReadDto>> GetLog(int id)
         {
             var log = await _context.Logs.FindAsync(id);
 
@@ -39,7 +47,13 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
-            return log;
+            return new LogReadDto
+            {
+                Id = log.Id,
+                Eventid = log.Eventid,
+                LogDescription = log.LogDescription,
+                Timestamp = log.Timestamp
+            };
         }
 
         // PUT: api/Log/5
@@ -74,9 +88,8 @@ namespace WebApplication1.Controllers
         }
 
         // POST: api/Log
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Log>> PostLog(LogCreateDto dto)
+        public async Task<ActionResult<LogReadDto>> PostLog(LogCreateDto dto)
         {
             var log = new Log
             {
@@ -88,7 +101,15 @@ namespace WebApplication1.Controllers
             _context.Logs.Add(log);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetLog), new { id = log.Id }, log);
+            var result = new LogReadDto
+            {
+                Id = log.Id,
+                Eventid = log.Eventid,
+                LogDescription = log.LogDescription,
+                Timestamp = log.Timestamp
+            };
+
+            return CreatedAtAction(nameof(GetLog), new { id = result.Id }, result);
         }
 
         // DELETE: api/Log/5

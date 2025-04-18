@@ -23,23 +23,41 @@ namespace WebApplication1.Controllers
 
         // GET: api/GeoFence
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GeoFence>>> GetGeoFences()
+        public async Task<ActionResult<IEnumerable<GeoFenceReadDto>>> GetGeoFences()
         {
-            return await _context.GeoFences.ToListAsync();
+            return await _context.GeoFences
+                .Select(g => new GeoFenceReadDto
+                {
+                    Id = g.Id,
+                    EventRadius = g.EventRadius,
+                    TeacherRadius = g.TeacherRadius,
+                    PairDistance = g.PairDistance,
+                    Latitude = g.Latitude,
+                    Longitude = g.Longitude
+                })
+                .ToListAsync();
         }
 
         // GET: api/GeoFence/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<GeoFence>> GetGeoFence(int id)
+        public async Task<ActionResult<GeoFenceReadDto>> GetGeoFence(int id)
         {
-            var geoFence = await _context.GeoFences.FindAsync(id);
+            var geo = await _context.GeoFences.FindAsync(id);
 
-            if (geoFence == null)
+            if (geo == null)
             {
                 return NotFound();
             }
 
-            return geoFence;
+            return new GeoFenceReadDto
+            {
+                Id = geo.Id,
+                EventRadius = geo.EventRadius,
+                TeacherRadius = geo.TeacherRadius,
+                PairDistance = geo.PairDistance,
+                Latitude = geo.Latitude,
+                Longitude = geo.Longitude
+            };
         }
 
         // PUT: api/GeoFence/5
@@ -74,11 +92,10 @@ namespace WebApplication1.Controllers
         }
 
         // POST: api/GeoFence
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<GeoFence>> PostGeoFence(GeoFenceCreateDto dto)
+        public async Task<ActionResult<GeoFenceReadDto>> PostGeoFence(GeoFenceCreateDto dto)
         {
-            var geoFence = new GeoFence
+            var geo = new GeoFence
             {
                 EventRadius = dto.EventRadius,
                 TeacherRadius = dto.TeacherRadius,
@@ -87,10 +104,20 @@ namespace WebApplication1.Controllers
                 Longitude = dto.Longitude
             };
 
-            _context.GeoFences.Add(geoFence);
+            _context.GeoFences.Add(geo);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetGeoFence), new { id = geoFence.Id }, geoFence);
+            var result = new GeoFenceReadDto
+            {
+                Id = geo.Id,
+                EventRadius = geo.EventRadius,
+                TeacherRadius = geo.TeacherRadius,
+                PairDistance = geo.PairDistance,
+                Latitude = geo.Latitude,
+                Longitude = geo.Longitude
+            };
+
+            return CreatedAtAction(nameof(GetGeoFence), new { id = result.Id }, result);
         }
 
         // DELETE: api/GeoFence/5

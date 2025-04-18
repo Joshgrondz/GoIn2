@@ -7,13 +7,13 @@ public partial class Notification
 {
     public int Id { get; set; }
 
-    public int? Userid { get; set; }
+    public int Userid { get; set; }
 
-    public int? Eventid { get; set; }
+    public int Eventid { get; set; }
 
     public string? NotificationDescription { get; set; }
 
-    public DateTime? NotificationTimestamp { get; set; }
+    public DateTime NotificationTimestamp { get; set; }
 
     public bool Sent { get; set; }
 

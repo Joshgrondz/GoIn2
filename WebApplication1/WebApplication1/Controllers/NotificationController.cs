@@ -23,23 +23,41 @@ namespace WebApplication1.Controllers
 
         // GET: api/Notification
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Notification>>> GetNotifications()
+        public async Task<ActionResult<IEnumerable<NotificationReadDto>>> GetNotifications()
         {
-            return await _context.Notifications.ToListAsync();
+            return await _context.Notifications
+                .Select(n => new NotificationReadDto
+                {
+                    Id = n.Id,
+                    Userid = n.Userid,
+                    Eventid = n.Eventid,
+                    NotificationDescription = n.NotificationDescription,
+                    NotificationTimestamp = n.NotificationTimestamp,
+                    Sent = n.Sent
+                })
+                .ToListAsync();
         }
 
         // GET: api/Notification/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Notification>> GetNotification(int id)
+        public async Task<ActionResult<NotificationReadDto>> GetNotification(int id)
         {
-            var notification = await _context.Notifications.FindAsync(id);
+            var n = await _context.Notifications.FindAsync(id);
 
-            if (notification == null)
+            if (n == null)
             {
                 return NotFound();
             }
 
-            return notification;
+            return new NotificationReadDto
+            {
+                Id = n.Id,
+                Userid = n.Userid,
+                Eventid = n.Eventid,
+                NotificationDescription = n.NotificationDescription,
+                NotificationTimestamp = n.NotificationTimestamp,
+                Sent = n.Sent
+            };
         }
 
         // PUT: api/Notification/5
@@ -74,11 +92,10 @@ namespace WebApplication1.Controllers
         }
 
         // POST: api/Notification
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Notification>> PostNotification(NotificationCreateDto dto)
+        public async Task<ActionResult<NotificationReadDto>> PostNotification(NotificationCreateDto dto)
         {
-            var notification = new Notification
+            var n = new Notification
             {
                 Userid = dto.Userid,
                 Eventid = dto.Eventid,
@@ -87,12 +104,21 @@ namespace WebApplication1.Controllers
                 Sent = dto.Sent
             };
 
-            _context.Notifications.Add(notification);
+            _context.Notifications.Add(n);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetNotification), new { id = notification.Id }, notification);
-        }
+            var result = new NotificationReadDto
+            {
+                Id = n.Id,
+                Userid = n.Userid,
+                Eventid = n.Eventid,
+                NotificationDescription = n.NotificationDescription,
+                NotificationTimestamp = n.NotificationTimestamp,
+                Sent = n.Sent
+            };
 
+            return CreatedAtAction(nameof(GetNotification), new { id = result.Id }, result);
+        }
         // DELETE: api/Notification/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNotification(int id)

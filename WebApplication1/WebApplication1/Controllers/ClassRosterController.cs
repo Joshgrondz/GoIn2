@@ -23,23 +23,35 @@ namespace WebApplication1.Controllers
 
         // GET: api/ClassRoster
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ClassRoster>>> GetClassRosters()
+        public async Task<ActionResult<IEnumerable<ClassRosterReadDto>>> GetClassRosters()
         {
-            return await _context.ClassRosters.ToListAsync();
+            return await _context.ClassRosters
+                .Select(r => new ClassRosterReadDto
+                {
+                    Id = r.Id,
+                    Classid = r.Classid,
+                    Studentid = r.Studentid
+                })
+                .ToListAsync();
         }
 
         // GET: api/ClassRoster/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ClassRoster>> GetClassRoster(int id)
+        public async Task<ActionResult<ClassRosterReadDto>> GetClassRoster(int id)
         {
-            var classRoster = await _context.ClassRosters.FindAsync(id);
+            var roster = await _context.ClassRosters.FindAsync(id);
 
-            if (classRoster == null)
+            if (roster == null)
             {
                 return NotFound();
             }
 
-            return classRoster;
+            return new ClassRosterReadDto
+            {
+                Id = roster.Id,
+                Classid = roster.Classid,
+                Studentid = roster.Studentid
+            };
         }
 
         // PUT: api/ClassRoster/5
@@ -74,9 +86,8 @@ namespace WebApplication1.Controllers
         }
 
         // POST: api/ClassRoster
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ClassRoster>> PostClassRoster(ClassRosterCreateDto dto)
+        public async Task<ActionResult<ClassRosterReadDto>> PostClassRoster(ClassRosterCreateDto dto)
         {
             var roster = new ClassRoster
             {
@@ -87,7 +98,14 @@ namespace WebApplication1.Controllers
             _context.ClassRosters.Add(roster);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetClassRoster), new { id = roster.Id }, roster);
+            var result = new ClassRosterReadDto
+            {
+                Id = roster.Id,
+                Classid = roster.Classid,
+                Studentid = roster.Studentid
+            };
+
+            return CreatedAtAction(nameof(GetClassRoster), new { id = result.Id }, result);
         }
 
         // DELETE: api/ClassRoster/5

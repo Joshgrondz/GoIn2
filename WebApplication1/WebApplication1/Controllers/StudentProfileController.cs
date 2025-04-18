@@ -23,23 +23,33 @@ namespace WebApplication1.Controllers
 
         // GET: api/StudentProfile
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<StudentProfile>>> GetStudentProfiles()
+        public async Task<ActionResult<IEnumerable<StudentProfileReadDto>>> GetStudentProfiles()
         {
-            return await _context.StudentProfiles.ToListAsync();
+            return await _context.StudentProfiles
+                .Select(sp => new StudentProfileReadDto
+                {
+                    Id = sp.Id,
+                    GradeLevel = sp.GradeLevel
+                })
+                .ToListAsync();
         }
 
         // GET: api/StudentProfile/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<StudentProfile>> GetStudentProfile(int id)
+        public async Task<ActionResult<StudentProfileReadDto>> GetStudentProfile(int id)
         {
-            var studentProfile = await _context.StudentProfiles.FindAsync(id);
+            var sp = await _context.StudentProfiles.FindAsync(id);
 
-            if (studentProfile == null)
+            if (sp == null)
             {
                 return NotFound();
             }
 
-            return studentProfile;
+            return new StudentProfileReadDto
+            {
+                Id = sp.Id,
+                GradeLevel = sp.GradeLevel
+            };
         }
 
         // PUT: api/StudentProfile/5
@@ -74,11 +84,9 @@ namespace WebApplication1.Controllers
         }
 
         // POST: api/StudentProfile
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<StudentProfile>> PostStudentProfile(StudentProfileCreateDto dto)
+        public async Task<ActionResult<StudentProfileReadDto>> PostStudentProfile(StudentProfileCreateDto dto)
         {
-            // Optional: check if User exists
             var userExists = await _context.Users.AnyAsync(u => u.Id == dto.Id);
             if (!userExists)
             {
@@ -92,24 +100,15 @@ namespace WebApplication1.Controllers
             };
 
             _context.StudentProfiles.Add(studentProfile);
+            await _context.SaveChangesAsync();
 
-            try
+            var result = new StudentProfileReadDto
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (StudentProfileExists(studentProfile.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                Id = studentProfile.Id,
+                GradeLevel = studentProfile.GradeLevel
+            };
 
-            return CreatedAtAction(nameof(GetStudentProfile), new { id = studentProfile.Id }, studentProfile);
+            return CreatedAtAction(nameof(GetStudentProfile), new { id = result.Id }, result);
         }
 
         // DELETE: api/StudentProfile/5

@@ -23,23 +23,43 @@ namespace WebApplication1.Controllers
 
         // GET: api/Event
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
+        public async Task<ActionResult<IEnumerable<EventReadDto>>> GetEvents()
         {
-            return await _context.Events.ToListAsync();
+            return await _context.Events
+                .Select(e => new EventReadDto
+                {
+                    Id = e.Id,
+                    EventName = e.EventName,
+                    EventDate = e.EventDate,
+                    EventLocation = e.EventLocation,
+                    Status = e.Status,
+                    Teacherid = e.Teacherid,
+                    Geofenceid = e.Geofenceid
+                })
+                .ToListAsync();
         }
 
         // GET: api/Event/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Event>> GetEvent(int id)
+        public async Task<ActionResult<EventReadDto>> GetEvent(int id)
         {
-            var @event = await _context.Events.FindAsync(id);
+            var e = await _context.Events.FindAsync(id);
 
-            if (@event == null)
+            if (e == null)
             {
                 return NotFound();
             }
 
-            return @event;
+            return new EventReadDto
+            {
+                Id = e.Id,
+                EventName = e.EventName,
+                EventDate = e.EventDate,
+                EventLocation = e.EventLocation,
+                Status = e.Status,
+                Teacherid = e.Teacherid,
+                Geofenceid = e.Geofenceid
+            };
         }
 
         // PUT: api/Event/5
@@ -74,9 +94,8 @@ namespace WebApplication1.Controllers
         }
 
         // POST: api/Event
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Event>> PostEvent(EventCreateDto dto)
+        public async Task<ActionResult<EventReadDto>> PostEvent(EventCreateDto dto)
         {
             var eventEntity = new Event
             {
@@ -91,7 +110,18 @@ namespace WebApplication1.Controllers
             _context.Events.Add(eventEntity);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetEvent), new { id = eventEntity.Id }, eventEntity);
+            var result = new EventReadDto
+            {
+                Id = eventEntity.Id,
+                EventName = eventEntity.EventName,
+                EventDate = eventEntity.EventDate,
+                EventLocation = eventEntity.EventLocation,
+                Status = eventEntity.Status,
+                Teacherid = eventEntity.Teacherid,
+                Geofenceid = eventEntity.Geofenceid
+            };
+
+            return CreatedAtAction(nameof(GetEvent), new { id = result.Id }, result);
         }
 
         // DELETE: api/Event/5

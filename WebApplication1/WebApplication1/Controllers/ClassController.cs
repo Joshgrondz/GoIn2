@@ -23,23 +23,35 @@ namespace WebApplication1.Controllers
 
         // GET: api/Class
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Class>>> GetClasses()
+        public async Task<ActionResult<IEnumerable<ClassReadDto>>> GetClasses()
         {
-            return await _context.Classes.ToListAsync();
+            return await _context.Classes
+                .Select(c => new ClassReadDto
+                {
+                    Id = c.Id,
+                    Teacherid = c.Teacherid,
+                    ClassName = c.ClassName
+                })
+                .ToListAsync();
         }
 
         // GET: api/Class/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Class>> GetClass(int id)
+        public async Task<ActionResult<ClassReadDto>> GetClass(int id)
         {
-            var @class = await _context.Classes.FindAsync(id);
+            var c = await _context.Classes.FindAsync(id);
 
-            if (@class == null)
+            if (c == null)
             {
                 return NotFound();
             }
 
-            return @class;
+            return new ClassReadDto
+            {
+                Id = c.Id,
+                Teacherid = c.Teacherid,
+                ClassName = c.ClassName
+            };
         }
 
         // PUT: api/Class/5
@@ -74,9 +86,8 @@ namespace WebApplication1.Controllers
         }
 
         // POST: api/Class
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Class>> PostClass(ClassCreateDto dto)
+        public async Task<ActionResult<ClassReadDto>> PostClass(ClassCreateDto dto)
         {
             var classEntity = new Class
             {
@@ -87,7 +98,14 @@ namespace WebApplication1.Controllers
             _context.Classes.Add(classEntity);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetClass), new { id = classEntity.Id }, classEntity);
+            var result = new ClassReadDto
+            {
+                Id = classEntity.Id,
+                Teacherid = classEntity.Teacherid,
+                ClassName = classEntity.ClassName
+            };
+
+            return CreatedAtAction(nameof(GetClass), new { id = result.Id }, result);
         }
 
         // DELETE: api/Class/5

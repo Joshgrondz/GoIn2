@@ -23,23 +23,31 @@ namespace WebApplication1.Controllers
 
         // GET: api/TeacherProfile
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TeacherProfile>>> GetTeacherProfiles()
+        public async Task<ActionResult<IEnumerable<TeacherProfileReadDto>>> GetTeacherProfiles()
         {
-            return await _context.TeacherProfiles.ToListAsync();
+            return await _context.TeacherProfiles
+                .Select(tp => new TeacherProfileReadDto
+                {
+                    Id = tp.Id
+                })
+                .ToListAsync();
         }
 
         // GET: api/TeacherProfile/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<TeacherProfile>> GetTeacherProfile(int id)
+        public async Task<ActionResult<TeacherProfileReadDto>> GetTeacherProfile(int id)
         {
-            var teacherProfile = await _context.TeacherProfiles.FindAsync(id);
+            var tp = await _context.TeacherProfiles.FindAsync(id);
 
-            if (teacherProfile == null)
+            if (tp == null)
             {
                 return NotFound();
             }
 
-            return teacherProfile;
+            return new TeacherProfileReadDto
+            {
+                Id = tp.Id
+            };
         }
 
         // PUT: api/TeacherProfile/5
@@ -75,9 +83,8 @@ namespace WebApplication1.Controllers
 
         // POST: api/TeacherProfile
         [HttpPost]
-        public async Task<ActionResult<TeacherProfileCreateDto>> PostTeacherProfile(TeacherProfileCreateDto dto)
+        public async Task<ActionResult<TeacherProfileReadDto>> PostTeacherProfile(TeacherProfileCreateDto dto)
         {
-            // Make sure the User exists first (optional check)
             var userExists = await _context.Users.AnyAsync(u => u.Id == dto.Id);
             if (!userExists)
             {
@@ -97,7 +104,7 @@ namespace WebApplication1.Controllers
             }
             catch (DbUpdateException)
             {
-                if (TeacherProfileExists(teacherProfile.Id))
+                if (_context.TeacherProfiles.Any(tp => tp.Id == teacherProfile.Id))
                 {
                     return Conflict();
                 }
@@ -107,7 +114,7 @@ namespace WebApplication1.Controllers
                 }
             }
 
-            var result = new TeacherProfileCreateDto
+            var result = new TeacherProfileReadDto
             {
                 Id = teacherProfile.Id
             };

@@ -23,23 +23,39 @@ namespace WebApplication1.Controllers
 
         // GET: api/Pair
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Pair>>> GetPairs()
+        public async Task<ActionResult<IEnumerable<PairReadDto>>> GetPairs()
         {
-            return await _context.Pairs.ToListAsync();
+            return await _context.Pairs
+                .Select(p => new PairReadDto
+                {
+                    Id = p.Id,
+                    Student1id = p.Student1id,
+                    Student2id = p.Student2id,
+                    Eventid = p.Eventid,
+                    Status = p.Status
+                })
+                .ToListAsync();
         }
 
         // GET: api/Pair/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Pair>> GetPair(int id)
+        public async Task<ActionResult<PairReadDto>> GetPair(int id)
         {
-            var pair = await _context.Pairs.FindAsync(id);
+            var p = await _context.Pairs.FindAsync(id);
 
-            if (pair == null)
+            if (p == null)
             {
                 return NotFound();
             }
 
-            return pair;
+            return new PairReadDto
+            {
+                Id = p.Id,
+                Student1id = p.Student1id,
+                Student2id = p.Student2id,
+                Eventid = p.Eventid,
+                Status = p.Status
+            };
         }
 
         // PUT: api/Pair/5
@@ -74,11 +90,10 @@ namespace WebApplication1.Controllers
         }
 
         // POST: api/Pair
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Pair>> PostPair(PairCreateDto dto)
+        public async Task<ActionResult<PairReadDto>> PostPair(PairCreateDto dto)
         {
-            var pair = new Pair
+            var p = new Pair
             {
                 Student1id = dto.Student1id,
                 Student2id = dto.Student2id,
@@ -86,10 +101,19 @@ namespace WebApplication1.Controllers
                 Status = dto.Status
             };
 
-            _context.Pairs.Add(pair);
+            _context.Pairs.Add(p);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetPair), new { id = pair.Id }, pair);
+            var result = new PairReadDto
+            {
+                Id = p.Id,
+                Student1id = p.Student1id,
+                Student2id = p.Student2id,
+                Eventid = p.Eventid,
+                Status = p.Status
+            };
+
+            return CreatedAtAction(nameof(GetPair), new { id = result.Id }, result);
         }
 
         // DELETE: api/Pair/5

@@ -9,7 +9,7 @@ public partial class Event
 
     public string? EventName { get; set; }
 
-    public DateOnly? EventDate { get; set; }
+    public DateOnly EventDate { get; set; }
 
     public string? EventLocation { get; set; }
 
@@ -17,7 +17,7 @@ public partial class Event
 
     public int Teacherid { get; set; }
 
-    public int? Geofenceid { get; set; }
+    public int Geofenceid { get; set; }
 
     public virtual ICollection<ClassEvent> ClassEvents { get; set; } = new List<ClassEvent>();
 

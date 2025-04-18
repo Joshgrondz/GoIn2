@@ -23,14 +23,22 @@ namespace WebApplication1.Controllers
 
         // GET: api/User
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users
+                .Select(u => new UserReadDto
+                {
+                    Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    UserType = u.UserType
+                })
+                .ToListAsync();
         }
 
         // GET: api/User/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<UserReadDto>> GetUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
 
@@ -39,7 +47,13 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
-            return user;
+            return new UserReadDto
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                UserType = user.UserType
+            };
         }
 
         // PUT: api/User/5
@@ -74,9 +88,8 @@ namespace WebApplication1.Controllers
         }
 
         // POST: api/User
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(UserCreateDto dto)
+        public async Task<ActionResult<UserReadDto>> PostUser(UserCreateDto dto)
         {
             var user = new User
             {
@@ -88,7 +101,36 @@ namespace WebApplication1.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            // Automatically create related profile
+            if (dto.UserType.ToLower() == "student")
+            {
+                var studentProfile = new StudentProfile
+                {
+                    Id = user.Id,
+                    GradeLevel = null // default or update if needed
+                };
+                _context.StudentProfiles.Add(studentProfile);
+            }
+            else if (dto.UserType.ToLower() == "teacher")
+            {
+                var teacherProfile = new TeacherProfile
+                {
+                    Id = user.Id
+                };
+                _context.TeacherProfiles.Add(teacherProfile);
+            }
+
+            await _context.SaveChangesAsync();
+
+            var result = new UserReadDto
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                UserType = user.UserType
+            };
+
+            return CreatedAtAction(nameof(GetUser), new { id = result.Id }, result);
         }
 
 

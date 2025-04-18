@@ -11,12 +11,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.goin2.API_and_location.ApiClient
 import com.example.goin2.R
-import com.example.goin2.student.StudentLoginActivity
 import com.example.goin2.teacher.TeacherLoginActivity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import com.example.goin2.student.StudentEventLoginActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
             .commit()
 
         findViewById<Button>(R.id.buttonStudent)?.setOnClickListener {
-            val intent = Intent(this, StudentLoginActivity::class.java)
+            val intent = Intent(this, StudentEventLoginActivity::class.java)
             startActivity(intent)
         }
 

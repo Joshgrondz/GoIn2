@@ -35,7 +35,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".student.StudentLoginActivity" android:exported="false" />
+        <activity android:name=".student.StudentEventLoginActivity" android:exported="false" />
+        <activity android:name=".student.StudentNameSelectActivity" android:exported="false" />
         <activity android:name=".teacher.TeacherLoginActivity" android:exported="false" />
         <activity android:name=".student.StudentActivity" android:exported="false" />
         <activity android:name=".teacher.TeacherActivity" android:exported="false" />

@@ -2,27 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center">
+    android:padding="24dp">
 
     <EditText
-        android:id="@+id/editTextFirstName"
+        android:id="@+id/editTextEventName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="First Name" />
-
-    <EditText
-        android:id="@+id/editTextLastName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Last Name"
-        android:layout_marginTop="12dp" />
+        android:hint="Enter Event Name" />
 
     <Button
-        android:id="@+id/buttonTeacherLogin"
+        android:id="@+id/buttonEnterEvent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login"
+        android:text="Enter Event"
         android:layout_marginTop="16dp" />
 </LinearLayout>

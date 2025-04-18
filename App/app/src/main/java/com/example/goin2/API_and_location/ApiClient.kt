@@ -130,6 +130,34 @@ object ApiClient {
         }.start()
     }
 
+
+    fun getStudents(callback: (String) -> Unit) {
+        Thread {
+            try {
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Students")
+                    .addHeader("accept", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val body = response.body?.string()
+
+                Log.d("ApiClient", "getStudents: $body")
+
+                if (body.isNullOrEmpty()) {
+                    mainHandler.post { callback("[]") }
+                } else {
+                    mainHandler.post { callback(body) }
+                }
+
+                response.close()
+            } catch (e: Exception) {
+                Log.e("ApiClient", "getStudents exception: ${e.message}", e)
+                mainHandler.post { callback("[]") }
+            }
+        }.start()
+    }
+
     fun getLastKnownLocation(studentId: Int = 7, callback: (Double, Double) -> Unit) {
         Thread {
             try {

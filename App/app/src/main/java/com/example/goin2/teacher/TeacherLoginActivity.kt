@@ -6,38 +6,30 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.goin2.API_and_location.ApiClient
 import com.example.goin2.R
 
 class TeacherLoginActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_teacher_login)
 
-        val nameInput = findViewById<EditText>(R.id.loginTeacherNameInput)
-        val loginButton = findViewById<Button>(R.id.buttonTeacherLogin)
-        val createButton = findViewById<Button>(R.id.buttonCreateTeacher)
+        val firstNameInput = findViewById<EditText>(R.id.editTextFirstName)
+        val lastNameInput = findViewById<EditText>(R.id.editTextLastName)
+        val loginBtn = findViewById<Button>(R.id.buttonTeacherLogin)
 
-        loginButton.setOnClickListener {
-            val name = nameInput.text.toString().trim()
-            if (name.isEmpty()) {
-                Toast.makeText(this, "Please enter a name", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+        loginBtn.setOnClickListener {
+            val first = firstNameInput.text.toString().trim()
+            val last = lastNameInput.text.toString().trim()
+
+            if (first.isEmpty() || last.isEmpty()) {
+                Toast.makeText(this, "Enter full name", Toast.LENGTH_SHORT).show()
+            } else {
+                // Replace this with real API logic
+                val intent = Intent(this, TeacherActivity::class.java)
+                intent.putExtra("teacher_name", "$first $last")
+                startActivity(intent)
             }
-
-            ApiClient.getStudentIdByName(name) { teacherId ->
-                if (teacherId != null) {
-                    val intent = Intent(this, TeacherActivity::class.java)
-                    intent.putExtra("teacher_id", teacherId)
-                    startActivity(intent)
-                } else {
-                    Toast.makeText(this, "Invalid teacher name", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        createButton.setOnClickListener {
-            Toast.makeText(this, "TODO: Create teacher", Toast.LENGTH_SHORT).show()
         }
     }
 }

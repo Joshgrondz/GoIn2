@@ -10,9 +10,7 @@ public class ChaperoneGeofence extends Geofence {
     }
 
     public void updateChaperone(User newChaperone){
-        synchronized (Chaperone) {
-            Chaperone = newChaperone;
-        }
+        Chaperone = newChaperone;
     }
 
     public boolean WithinChaperoneGeofence(User Student){

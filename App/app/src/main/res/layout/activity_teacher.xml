@@ -6,30 +6,22 @@
     android:gravity="center">
 
     <Button
-        android:id="@+id/buttonTeacher"
+        android:id="@+id/buttonAddStudents"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Teacher" />
+        android:text="Add Students" />
 
     <Button
-        android:id="@+id/buttonStudent"
+        android:id="@+id/buttonCreateEvent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Student"
+        android:text="Create Event"
         android:layout_marginTop="16dp" />
 
-    <ProgressBar
-        android:id="@+id/pingLoader"
-        style="?android:attr/progressBarStyleSmall"
-        android:layout_width="wrap_content"
+    <Button
+        android:id="@+id/buttonStartEvent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
+        android:text="Start Event"
         android:layout_marginTop="16dp" />
-
-    <ImageView
-        android:id="@+id/pingStatusIcon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginTop="8dp"
-        android:visibility="gone" />
 </LinearLayout>

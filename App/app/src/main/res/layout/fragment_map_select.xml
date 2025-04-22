@@ -1,0 +1,131 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Google Map Fragment -->
+    <fragment
+        android:id="@+id/fullScreenMap"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Top: Search bar with input and button -->
+    <LinearLayout
+        android:id="@+id/searchBarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_margin="25dp"
+        android:background="@android:color/black"
+        android:elevation="5dp"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Search location..."
+            app:boxBackgroundMode="outline"
+            app:hintEnabled="true"
+            app:boxStrokeColor="@android:color/darker_gray"
+            app:boxBackgroundColor="@android:color/black">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/mapSearchInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/darker_gray" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/buttonSearchLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="Search"
+            android:textColor="@android:color/white"
+            android:background="@android:color/black" />
+    </LinearLayout>
+
+    <!-- Bottom: Overlay controls for radius + actions -->
+    <LinearLayout
+        android:id="@+id/overlayControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_gravity="bottom"
+        android:background="@android:color/black"
+        android:elevation="8dp">
+
+        <!-- Cancel and Drop Pin -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonCancelMap"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="@android:color/black"
+                android:text="Cancel"
+                android:textColor="@android:color/white" />
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="56dp" />
+
+            <Button
+                android:id="@+id/buttonDropPin"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="@android:color/black"
+                android:text="Drop Pin at Center"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <!-- Radius slider -->
+        <SeekBar
+            android:id="@+id/mapRadiusSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Radius input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@android:color/darker_gray"
+            app:boxBackgroundColor="@android:color/black">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/mapRadiusInput"
+                android:layout_width="match_parent"
+                android:layout_height="65dp"
+                android:hint="Radius in meters"
+                android:inputType="number"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/darker_gray" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Submit -->
+        <Button
+            android:id="@+id/buttonConfirmMap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Submit"
+            android:textColor="@android:color/white"
+            android:background="@android:color/black" />
+    </LinearLayout>
+</FrameLayout>

@@ -59,32 +59,21 @@ namespace WebApplication1.Controllers
         }
 
         // PUT: api/Pair/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPair(int id, Pair pair)
+        public async Task<IActionResult> PutPair(int id, PairUpdateDto dto)
         {
-            if (id != pair.Id)
+            var pair = await _context.Pairs.FindAsync(id);
+            if (pair == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(pair).State = EntityState.Modified;
+            pair.Student1id = dto.Student1id;
+            pair.Student2id = dto.Student2id;
+            pair.Eventid = dto.Eventid;
+            pair.Status = dto.Status;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PairExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }

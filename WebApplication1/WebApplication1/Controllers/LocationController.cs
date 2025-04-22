@@ -99,6 +99,36 @@ namespace WebApplication1.Controllers
             return NoContent();
         }
 
+        // GET: api/Location/latest/5
+        [HttpGet("latest/{userId}")]
+        public async Task<ActionResult<LocationReadDto>> GetLatestLocationByUserId(int userId)
+        {
+            var latestLocation = await _context.Locations
+                .Where(l => l.Userid == userId)
+                .OrderByDescending(l => l.TimestampMs)
+                .FirstOrDefaultAsync();
+
+            if (latestLocation == null)
+            {
+                return NotFound();
+            }
+
+            return new LocationReadDto
+            {
+                Id = latestLocation.Id,
+                Userid = latestLocation.Userid,
+                Latitude = latestLocation.Latitude,
+                Longitude = latestLocation.Longitude,
+                LocAccuracy = latestLocation.LocAccuracy,
+                LocAltitude = latestLocation.LocAltitude,
+                LocSpeed = latestLocation.LocSpeed,
+                LocBearing = latestLocation.LocBearing,
+                LocProvider = latestLocation.LocProvider,
+                TimestampMs = latestLocation.TimestampMs
+            };
+        }
+
+
         // POST: api/Location
         [HttpPost]
         public async Task<ActionResult<LocationReadDto>> PostLocation(LocationCreateDto dto)

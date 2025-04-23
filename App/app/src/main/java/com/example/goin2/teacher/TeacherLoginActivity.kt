@@ -4,9 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.goin2.API_and_location.ApiClient
 import com.example.goin2.R
+import com.example.goin2.main.MainActivity
 
 class TeacherLoginActivity : AppCompatActivity() {
 
@@ -17,18 +18,31 @@ class TeacherLoginActivity : AppCompatActivity() {
         val firstNameInput = findViewById<EditText>(R.id.editTextFirstName)
         val lastNameInput = findViewById<EditText>(R.id.editTextLastName)
         val loginBtn = findViewById<Button>(R.id.buttonTeacherLogin)
+        val createBtn = findViewById<Button>(R.id.buttonCreateTeacher)
 
         loginBtn.setOnClickListener {
             val first = firstNameInput.text.toString().trim()
             val last = lastNameInput.text.toString().trim()
 
-            if (first.isEmpty() || last.isEmpty()) {
-                Toast.makeText(this, "Enter full name", Toast.LENGTH_SHORT).show()
-            } else {
-                // Replace this with real API logic
-                val intent = Intent(this, TeacherActivity::class.java)
-                intent.putExtra("teacher_name", "$first $last")
-                startActivity(intent)
+            if (first.isNotEmpty() && last.isNotEmpty()) {
+                ApiClient.loginTeacher(first, last, this) { userId ->
+                    if (userId != null) {
+                        startActivity(Intent(this, TeacherActivity::class.java))
+                    }
+                }
+            }
+        }
+
+        createBtn.setOnClickListener {
+            val first = firstNameInput.text.toString().trim()
+            val last = lastNameInput.text.toString().trim()
+
+            if (first.isNotEmpty() && last.isNotEmpty()) {
+                ApiClient.createTeacher(first, last, this) { userId ->
+                    if (userId != null) {
+                        startActivity(Intent(this, TeacherActivity::class.java))
+                    }
+                }
             }
         }
     }

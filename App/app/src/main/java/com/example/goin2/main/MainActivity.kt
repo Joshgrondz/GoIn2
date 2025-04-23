@@ -21,6 +21,7 @@ import com.example.goin2.student.StudentEventLoginActivity
 class MainActivity : AppCompatActivity() {
 
     companion object {
+        var currentTeacherId: Int = 0
         var currentStudentId: Int = 7
     }
 

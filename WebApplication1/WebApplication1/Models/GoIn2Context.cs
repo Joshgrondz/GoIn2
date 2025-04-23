@@ -35,7 +35,7 @@ public partial class GoIn2Context : DbContext
 
     public virtual DbSet<Message> Messages { get; set; }
 
-    public virtual DbSet<MostRecentStudentLocationsView> MostRecentStudentLocationsViews { get; set; }
+    public virtual DbSet<MostRecentStudentLocationView> MostRecentStudentLocationViews { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
@@ -258,11 +258,11 @@ public partial class GoIn2Context : DbContext
                 .HasConstraintName("FK__Messages__sender__5649C92D");
         });
 
-        modelBuilder.Entity<MostRecentStudentLocationsView>(entity =>
+        modelBuilder.Entity<MostRecentStudentLocationView>(entity =>
         {
             entity
                 .HasNoKey()
-                .ToView("MostRecentStudentLocationsView");
+                .ToView("MostRecentStudentLocationView");
 
             entity.Property(e => e.EventName)
                 .HasMaxLength(100)

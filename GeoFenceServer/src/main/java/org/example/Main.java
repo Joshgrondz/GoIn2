@@ -45,28 +45,27 @@ public class Main {
             pauseForOneMinute();
             eventController.updateEventInformation(client);
         }
-        System.out.println("Event now Active, tracking students");
+        System.out.println("Event now Active, tracking students\n");
 
         //Get Chaperone Data
+        System.out.println("Getting chaperone Data");
         eventController.updateChaperone(client);
 
         //get students locations
+        System.out.println("\nGet Students locations");
         eventController.updateStudentGroup(client);
 
         //get students who should be part of the class trip
+        System.out.println("\nGet Students attending");
         eventController.updateStudentAttandingList(client);
 
         //Whose location has not been tracked yet?
 
-
+        System.out.println("\nSee who isnt being tracked");
         eventController.checkWhoIsntBeingTracked();
 
-        //Check Locations
-        //Every minute
-        //Only students who are tracked
-        //Notify if outside or broken rule
 
-
+        System.out.println("\nTracking Students locations with while loop");
         while(eventController.EventInformation.getBoolean("status")){
             if(!eventController.checkGeofence()){
                 System.out.println("Student outside of geofence");
@@ -77,9 +76,13 @@ public class Main {
             if(!eventController.checkChaperoneGeofence()){
                 System.out.println("Students outside of Chaperone Geofence");
             }
+
+            System.out.println("\nChecking for stale locations");
             eventController.checkStaleLocations();
             pauseForOneMinute();
 
+
+            System.out.println("");
             //update Student Locations
             eventController.updateStudentGroup(client);
             eventController.updateStudentAttandingList(client);

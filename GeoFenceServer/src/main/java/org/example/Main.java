@@ -35,7 +35,17 @@ public class Main {
         EventGeofenceController eventController = EventGeofenceController.CreateGeoFenceController(eventID, client);
         if(eventController != null){
             System.out.println("Event Controller Made");
+            System.out.println(eventController);
         }
+
+
+
+        while(!eventController.EventInformation.getBoolean("status")){
+            System.out.println("Event Not Active Yet waiting to track");
+            pauseForOneMinute();
+            eventController.updateEventInformation(client);
+        }
+        System.out.println("Event now Active, tracking students");
 
         //Get Chaperone Data
         eventController.updateChaperone(client);
@@ -47,17 +57,15 @@ public class Main {
         eventController.updateStudentAttandingList(client);
 
         //Whose location has not been tracked yet?
+
+
         eventController.checkWhoIsntBeingTracked();
 
         //Check Locations
         //Every minute
         //Only students who are tracked
         //Notify if outside or broken rule
-        while(!eventController.EventInformation.getBoolean("status")){
-            System.out.println("Event Not Active Yet waiting to track");
-            pauseForOneMinute();
-            eventController.updateEventInformation(client);
-        }
+
 
         while(eventController.EventInformation.getBoolean("status")){
             if(!eventController.checkGeofence()){
@@ -91,7 +99,7 @@ public class Main {
 
     public static void pauseForOneMinute() {
         try {
-            Thread.sleep(60000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             System.err.println("Sleep interrupted: " + e.getMessage());
             Thread.currentThread().interrupt();

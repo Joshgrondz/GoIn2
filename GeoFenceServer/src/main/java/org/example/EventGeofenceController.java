@@ -57,15 +57,13 @@ public class EventGeofenceController {
     }
 
     public void updateStudentGroup(HttpClient client){
-        String studentLocationEventIDEndpoint = "/api/MostRecentStudentLocationsView/by-event/" + EventInformation.getInt("id");
+        String studentLocationEventIDEndpoint = "/api/MostRecentStudentLocationView/by-event/" + EventInformation.getInt("id");
         JSONArray studentList = null;
         try{
             studentList = APICalls.makeGetRequestMultiItem(client, studentLocationEventIDEndpoint);
         }catch (Exception e){
             throw new RuntimeException(e);
         }
-
-        System.out.println(studentList.toString());
 
         if(studentList != null){
             System.out.println("Student Locations Retrieved");
@@ -113,7 +111,7 @@ public class EventGeofenceController {
         for(int i = 0; i < studentsOnTripJson.length(); i++){
             JSONObject s = studentsOnTripJson.getJSONObject(i);
 
-            User student = new User(s.getInt("studentId"),s.getString("fistName"),s.getString("s.lastName"),0,0);
+            User student = new User(s.getInt("studentId"),s.getString("firstName"),s.getString("lastName"),0,0);
             StudentsInEvent.add(student);
         }
 
@@ -335,5 +333,11 @@ public class EventGeofenceController {
         controller.addEventData(Event);
         return controller;
 
+    }
+
+
+    public String toString(){
+        return "---------\n Event Name: " + EventInformation.getString("eventName") + "\nEvent Date: " + EventInformation.getString("eventDate") +
+                "\nEvent Location: " + EventInformation.getString("eventLocation") + "\n---------\n";
     }
 }

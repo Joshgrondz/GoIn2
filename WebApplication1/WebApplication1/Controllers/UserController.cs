@@ -144,11 +144,61 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
+            var userType = user.UserType.Trim().ToLower();
+
+            if (userType == "student")
+            {
+                // Delete student's related records
+                _context.ClassRosters.RemoveRange(_context.ClassRosters.Where(cr => cr.Studentid == id));
+                _context.Pairs.RemoveRange(_context.Pairs.Where(p => p.Student1id == id || p.Student2id == id));
+                _context.Locations.RemoveRange(_context.Locations.Where(l => l.Userid == id));
+                _context.Notifications.RemoveRange(_context.Notifications.Where(n => n.Userid == id));
+
+                var studentProfile = await _context.StudentProfiles.FindAsync(id);
+                if (studentProfile != null)
+                {
+                    _context.StudentProfiles.Remove(studentProfile);
+                }
+            }
+            else if (userType == "teacher")
+            {
+                // Delete teacher's events and related data
+                var events = _context.Events.Where(e => e.Teacherid == id).ToList();
+                foreach (var ev in events)
+                {
+                    _context.Logs.RemoveRange(_context.Logs.Where(l => l.Eventid == ev.Id));
+                    _context.Pairs.RemoveRange(_context.Pairs.Where(p => p.Eventid == ev.Id));
+                    _context.Notifications.RemoveRange(_context.Notifications.Where(n => n.Eventid == ev.Id));
+                    _context.ClassEvents.RemoveRange(_context.ClassEvents.Where(ce => ce.Eventid == ev.Id));
+                }
+                _context.Events.RemoveRange(events);
+
+                // Delete teacher's classes and related data
+                var classes = _context.Classes.Where(c => c.Teacherid == id).ToList();
+                foreach (var cls in classes)
+                {
+                    _context.ClassRosters.RemoveRange(_context.ClassRosters.Where(cr => cr.Classid == cls.Id));
+                    _context.ClassEvents.RemoveRange(_context.ClassEvents.Where(ce => ce.Classid == cls.Id));
+                }
+                _context.Classes.RemoveRange(classes);
+
+                // Delete GeoFences assigned to teacher-owned events (optional logic if you track ownership)
+                // (If not directly tied to teacherid, this may be unnecessary)
+
+                var teacherProfile = await _context.TeacherProfiles.FindAsync(id);
+                if (teacherProfile != null)
+                {
+                    _context.TeacherProfiles.Remove(teacherProfile);
+                }
+            }
+
+            // Finally, delete the User
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
+
 
         private bool UserExists(int id)
         {

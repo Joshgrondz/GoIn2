@@ -91,6 +91,32 @@ namespace WebApplication1.Controllers
             return NoContent();
         }
 
+        // GET: api/Notification/user/5
+        [HttpGet("user/{userid}")]
+        public async Task<ActionResult<IEnumerable<NotificationReadDto>>> GetNotificationsByUserId(int userid)
+        {
+            var notifications = await _context.Notifications
+                .Where(n => n.Userid == userid)
+                .Select(n => new NotificationReadDto
+                {
+                    Id = n.Id,
+                    Userid = n.Userid,
+                    Eventid = n.Eventid,
+                    NotificationDescription = n.NotificationDescription,
+                    NotificationTimestamp = n.NotificationTimestamp,
+                    Sent = n.Sent
+                })
+                .ToListAsync();
+
+            if (notifications == null || !notifications.Any())
+            {
+                return NotFound();
+            }
+
+            return notifications;
+        }
+
+
         // POST: api/Notification
         [HttpPost]
         public async Task<ActionResult<NotificationReadDto>> PostNotification(NotificationCreateDto dto)

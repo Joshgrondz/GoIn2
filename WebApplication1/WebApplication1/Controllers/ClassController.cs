@@ -112,17 +112,52 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClass(int id)
         {
-            var @class = await _context.Classes.FindAsync(id);
-            if (@class == null)
+            var classEntity = await _context.Classes.FindAsync(id);
+            if (classEntity == null)
             {
                 return NotFound();
             }
 
-            _context.Classes.Remove(@class);
+            // Get all student IDs linked to the class
+            var rosterEntries = await _context.ClassRosters
+                .Where(cr => cr.Classid == id)
+                .ToListAsync();
+
+            var studentIds = rosterEntries.Select(r => r.Studentid).Distinct().ToList();
+
+            // Remove the roster entries first
+            _context.ClassRosters.RemoveRange(rosterEntries);
+
+            // Then delete all users + student profiles tied to those student IDs
+            foreach (var studentId in studentIds)
+            {
+                var user = await _context.Users.FindAsync(studentId);
+                if (user != null && user.UserType.ToLower() == "student")
+                {
+                    // This mimics what your User DELETE already does
+                    _context.Pairs.RemoveRange(_context.Pairs.Where(p => p.Student1id == studentId || p.Student2id == studentId));
+                    _context.Locations.RemoveRange(_context.Locations.Where(l => l.Userid == studentId));
+                    _context.Notifications.RemoveRange(_context.Notifications.Where(n => n.Userid == studentId));
+                    
+
+                    var studentProfile = await _context.StudentProfiles.FindAsync(studentId);
+                    if (studentProfile != null)
+                    {
+                        _context.StudentProfiles.Remove(studentProfile);
+                    }
+
+                    _context.Users.Remove(user);
+                }
+            }
+
+            // Now finally remove the class itself
+            _context.Classes.Remove(classEntity);
+
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
+
 
         private bool ClassExists(int id)
         {

@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.http.HttpClient;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,8 @@ public class EventGeofenceController {
     public List<User> StudentsOutsideFence;
     public List<GoIn2Group> GoIn2GroupsOutsideFence;
     public List<User> StudentsOutsideChaperone;
+    private Map<Integer, Instant> lastUpdatedTimes = new HashMap<>();
+    private long stalenessThresholdSeconds = 300; // 5 minutes (adjust as needed)
 
     // Establish Event's Geofence
     public EventGeofenceController(User Chaperone, float EventCenterLatitude, float EventCenterLongitude, float EventRadiusFeet, float ChaperoneDistance, float GoIn2Distance) {
@@ -54,13 +57,15 @@ public class EventGeofenceController {
     }
 
     public void updateStudentGroup(HttpClient client){
-        String studentLocationEventIDEndpoint = "/api/MostRecentStudentLocationsView/" + EventInformation.getInt("id");
+        String studentLocationEventIDEndpoint = "/api/MostRecentStudentLocationsView/by-event/" + EventInformation.getInt("id");
         JSONArray studentList = null;
         try{
             studentList = APICalls.makeGetRequestMultiItem(client, studentLocationEventIDEndpoint);
         }catch (Exception e){
             throw new RuntimeException(e);
         }
+
+        System.out.println(studentList.toString());
 
         if(studentList != null){
             System.out.println("Student Locations Retrieved");
@@ -69,12 +74,20 @@ public class EventGeofenceController {
             System.exit(76);
         }
 
+        if(studentList.length() == 0){
+            System.out.println("Student list is empty");
+            System.out.println("Continueing without students");
+        }
+
         for (int i = 0; i < studentList.length(); i++){
             JSONObject s = studentList.getJSONObject(i);
 
             User student = new User(s.getInt("studentId"), s.getString("firstName"),
                     s.getString("lastName"), s.getFloat("latitude"),s.getFloat("longitude"));
             StudentGroup.add(student);
+
+            //Update last updated time
+            lastUpdatedTimes.put(student.ID, Instant.now());
         }
 
         if(StudentGroup.size() != studentList.length()){
@@ -140,9 +153,25 @@ public class EventGeofenceController {
         }
     }
 
-    public void updateChaperone(User newChaperone){
-        Chaperone = newChaperone;
-        ChaperoneGeofence.updateChaperone(Chaperone);
+    public void updateChaperone(HttpClient client){
+        int chaperoneID = Chaperone.getID();
+        String chaperoneAccess = "/api/Location/latest/" + chaperoneID;
+        JSONObject chaperone;
+        try{
+            chaperone = APICalls.makeGetRequestSingleItem(client, chaperoneAccess);
+        } catch(Exception e){
+            throw new RuntimeException(e);
+        }
+
+        if(chaperone != null){
+            System.out.println("Chaperone Information Retrieved");
+        }
+        else{
+            System.exit(908);
+        }
+
+        Chaperone.Latitude = chaperone.getFloat("latitude");
+        Chaperone.Longitude = chaperone.getFloat("longitude");
     }
 
     // Check Main Geofence
@@ -184,10 +213,20 @@ public class EventGeofenceController {
     public boolean checkChaperoneGeofence() {
         boolean flag = true;
         StudentsOutsideChaperone.clear();
+
+        //Create a set of all the students that are in a GoIn2Group
+        Set<Integer> studentsInGroups = new HashSet<>();
+        for (GoIn2Group group : GoIn2Groups) {
+            studentsInGroups.add(group.Student1.ID);
+            studentsInGroups.add(group.Student2.ID);
+        }
         for (User student : StudentGroup) {
-            if (!ChaperoneGeofence.WithinChaperoneGeofence(student)) {
-                flag = false;
-                StudentsOutsideChaperone.add(student);
+            //Only check the chaperone geofence if the student is not in a goin2group
+            if (!studentsInGroups.contains(student.ID)) {
+                if (!ChaperoneGeofence.WithinChaperoneGeofence(student)) {
+                    flag = false;
+                    StudentsOutsideChaperone.add(student);
+                }
             }
         }
         return flag;
@@ -214,6 +253,27 @@ public class EventGeofenceController {
             System.exit(420);
         }
     }
+
+    public void checkStaleLocations() {
+        Instant currentTime = Instant.now();
+        List<User> staleStudents = new ArrayList<>();
+
+        for (User student : StudentGroup) {
+            Instant lastUpdate = lastUpdatedTimes.get(student.ID);
+            if (lastUpdate != null && currentTime.getEpochSecond() - lastUpdate.getEpochSecond() > stalenessThresholdSeconds) {
+                staleStudents.add(student);
+            }
+        }
+
+        if (!staleStudents.isEmpty()) {
+            System.out.println("\nStudents with stale locations (not updated in the last " + stalenessThresholdSeconds + " seconds):");
+            staleStudents.forEach(student -> System.out.println("  ID: " + student.getID() + ", Name: " + student.getFirstName() + " " + student.getLastName()));
+            //  Notify or handle stale locations as needed (e.g., send alerts)
+        } else {
+            System.out.println("\nAll student locations are up-to-date.");
+        }
+    }
+
 
     //static method to create a geofenceController with just EventID
     //uses api calls to database to be able to gather needed information

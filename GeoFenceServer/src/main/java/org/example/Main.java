@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 
 /*
 TO-DO-List
- - Load most recent chaperone location
- - add logic for if students are in goin2 group don't have to check their chaperone geofence
  - add logic for if student's location hasn't been updated for more than a certain time
 */
 
@@ -35,11 +33,12 @@ public class Main {
 
         //Create Geofence
         EventGeofenceController eventController = EventGeofenceController.CreateGeoFenceController(eventID, client);
+        if(eventController != null){
+            System.out.println("Event Controller Made");
+        }
 
-        //Get Chaperone Location
-
-        //Waiting for Get Most Recent Location by User ID
-
+        //Get Chaperone Data
+        eventController.updateChaperone(client);
 
         //get students locations
         eventController.updateStudentGroup(client);
@@ -70,6 +69,7 @@ public class Main {
             if(!eventController.checkChaperoneGeofence()){
                 System.out.println("Students outside of Chaperone Geofence");
             }
+            eventController.checkStaleLocations();
             pauseForOneMinute();
 
             //update Student Locations
@@ -77,6 +77,7 @@ public class Main {
             eventController.updateStudentAttandingList(client);
 
             //update chaperone location
+            eventController.updateChaperone(client);
 
             if(!eventController.allStudentsTracked()){
                 eventController.checkWhoIsntBeingTracked();

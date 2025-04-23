@@ -31,7 +31,7 @@ namespace WebApplication1.Controllers
 
 
         //get student location by Student ID
-        [HttpGet("{studentId}")]
+        [HttpGet("by-student/{studentId}")]
         public async Task<ActionResult<MostRecentStudentLocationsView>> GetMostRecentStudentLocationByStudentId(int studentId)
         {
             var MostRecentByStudentId = await _context.MostRecentStudentLocationsViews.FindAsync(studentId);
@@ -46,7 +46,7 @@ namespace WebApplication1.Controllers
 
 
         // Get all student locations by event ID
-        [HttpGet("{eventid}")]
+        [HttpGet("by-event/{eventid}")]
         public async Task<ActionResult<List<MostRecentStudentLocationsView>>> GetMostRecentStudentLocationsByEventId(int eventid)
         {
             var locations = await _context.MostRecentStudentLocationsViews

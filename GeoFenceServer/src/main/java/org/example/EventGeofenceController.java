@@ -57,6 +57,7 @@ public class EventGeofenceController {
     }
 
     public void updateStudentGroup(HttpClient client){
+        StudentGroup = new ArrayList<User>();
         String studentLocationEventIDEndpoint = "/api/MostRecentStudentLocationView/by-event/" + EventInformation.getInt("id");
         JSONArray studentList = null;
         try{
@@ -94,6 +95,7 @@ public class EventGeofenceController {
     }
 
     public void updateStudentAttandingList(HttpClient client){
+        StudentsInEvent= new ArrayList<User>();
         String studentsOnTripEndpoint = "/api/StudentsInEventsView/" + EventInformation.getInt("id");
         JSONArray studentsOnTripJson = null;
         try{

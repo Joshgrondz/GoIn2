@@ -82,7 +82,7 @@ public class Main {
             pauseForOneMinute();
 
 
-            System.out.println("");
+            System.out.println("\nUpdating student locations");
             //update Student Locations
             eventController.updateStudentGroup(client);
             eventController.updateStudentAttandingList(client);

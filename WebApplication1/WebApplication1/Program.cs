@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
 using Microsoft.OpenApi.Models;
+using WebApplication1.Controllers;
+using WebApplication1.Dto;
 
 var builder = WebApplication.CreateBuilder(args);
 

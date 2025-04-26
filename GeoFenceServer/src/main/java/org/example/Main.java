@@ -64,6 +64,7 @@ public class Main {
         System.out.println("\nSee who isnt being tracked");
         eventController.checkWhoIsntBeingTracked();
 
+        eventController.updateGoIn2Groups(client);
 
         System.out.println("\nTracking Students locations with while loop");
         while(eventController.EventInformation.getBoolean("status")){
@@ -74,6 +75,9 @@ public class Main {
             eventController.updateStudentAttandingList(client);
             //update chaperone location
             eventController.updateChaperone(client);
+
+            //update goin2groups
+            eventController.updateGoIn2Groups(client);
 
             //Create goIn2 Groups
 

@@ -173,6 +173,34 @@ public class EventGeofenceController {
         Chaperone.Longitude = chaperone.getFloat("longitude");
     }
 
+    public void updateGoIn2Groups(HttpClient client){
+        GoIn2Groups = new ArrayList<GoIn2Group>();
+        String goIn2GroupEndpoint = "/api/Pair/Event/" + EventInformation.getInt("id") + "/Active";
+        JSONArray goIn2GroupsJson = null;
+        try{
+            goIn2GroupsJson = APICalls.makeGetRequestMultiItem(client, goIn2GroupEndpoint);
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+        if(goIn2GroupsJson != null){
+            System.out.println("Retrieved all GoIn2 Groups");
+        }
+        else{
+            System.out.println("No Go In 2 groups active");
+        }
+
+        for(int i = 0; i < goIn2GroupsJson.length(); i++){
+            JSONObject s = goIn2GroupsJson.getJSONObject(i);
+            User student1 = findStudentById(s.getInt("student1id"));
+            User student2 = findStudentById(s.getInt("student2id"));
+            GoIn2Group g = new GoIn2Group(student1,student2,goIn2Distance);
+            GoIn2Groups.add(g);
+        }
+    }
+
+
+
+
     // Check Main Geofence
     public boolean checkGeofence() {
         boolean flag = true;
@@ -351,6 +379,15 @@ public class EventGeofenceController {
 
     }
 
+    public User findStudentById(int studentId) {
+        // Iterate through the list of students currently being tracked
+        for (User student : StudentGroup) {
+            if (student.getID() == studentId) {
+                return student;
+            }
+        }
+        return null;
+    }
 
     public String toString(){
         return "---------\n Event Name: " + EventInformation.getString("eventName") + "\nEvent Date: " + EventInformation.getString("eventDate") +

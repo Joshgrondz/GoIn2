@@ -1,7 +1,7 @@
 package org.example;
 
 public class Geofence {
-    public static final double EARTH_RADIUS_FEET = 20902231;
+    public static final double EARTH_RADIUS_Meters = 6371000;
 
     public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         double lat1Rad = Math.toRadians(lat1);
@@ -17,6 +17,6 @@ public class Geofence {
                         Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        return EARTH_RADIUS_FEET * c;
+        return EARTH_RADIUS_Meters * c;
     }
 }

@@ -35,53 +35,76 @@ public class Main {
         EventGeofenceController eventController = EventGeofenceController.CreateGeoFenceController(eventID, client);
         if(eventController != null){
             System.out.println("Event Controller Made");
+            System.out.println(eventController);
         }
 
-        //Get Chaperone Data
-        eventController.updateChaperone(client);
 
-        //get students locations
-        eventController.updateStudentGroup(client);
-
-        //get students who should be part of the class trip
-        eventController.updateStudentAttandingList(client);
-
-        //Whose location has not been tracked yet?
-        eventController.checkWhoIsntBeingTracked();
-
-        //Check Locations
-        //Every minute
-        //Only students who are tracked
-        //Notify if outside or broken rule
+        //Waits till event status is TRUE
         while(!eventController.EventInformation.getBoolean("status")){
             System.out.println("Event Not Active Yet waiting to track");
             pauseForOneMinute();
             eventController.updateEventInformation(client);
         }
+        System.out.println("Event now Active, tracking students\n");
 
+
+        //Get Chaperone Data
+        System.out.println("Getting chaperone Data");
+        eventController.updateChaperone(client);
+
+        //get students locations
+        System.out.println("\nGet Students locations");
+        eventController.updateStudentGroup(client);
+
+        //get students who should be part of the class trip
+        System.out.println("\nGet Students attending");
+        eventController.updateStudentAttandingList(client);
+
+        //Whose location has not been tracked yet?
+        System.out.println("\nSee who isnt being tracked");
+        eventController.checkWhoIsntBeingTracked();
+
+        eventController.updateGoIn2Groups(client);
+
+        System.out.println("\nTracking Students locations with while loop");
         while(eventController.EventInformation.getBoolean("status")){
-            if(!eventController.checkGeofence()){
-                System.out.println("Student outside of geofence");
-            }
-            if(!eventController.checkGoIn2Groups()){
-                System.out.println("Students outside of GoIn2Groups");
-            }
-            if(!eventController.checkChaperoneGeofence()){
-                System.out.println("Students outside of Chaperone Geofence");
-            }
-            eventController.checkStaleLocations();
-            pauseForOneMinute();
 
+            System.out.println("\nUpdating student locations");
             //update Student Locations
             eventController.updateStudentGroup(client);
             eventController.updateStudentAttandingList(client);
-
             //update chaperone location
             eventController.updateChaperone(client);
+
+            //update goin2groups
+            eventController.updateGoIn2Groups(client);
+
+            //Create goIn2 Groups
 
             if(!eventController.allStudentsTracked()){
                 eventController.checkWhoIsntBeingTracked();
             }
+
+
+            if(!eventController.checkGeofence()){
+                System.out.println("Student outside of geofence");
+                List<User> student = eventController.getStudentsOutsideFence();
+                System.out.println(student);
+            }
+            if(!eventController.checkGoIn2Groups()){ //test with someone (Maybe once we have location sending done)
+                System.out.println("Students outside of GoIn2Groups");
+                List<GoIn2Group> student = eventController.getGoIn2GroupsOutsideFence();
+                System.out.println(student); //Format this better please
+            }
+            if(!eventController.checkChaperoneGeofence()){
+                System.out.println("Students outside of Chaperone Geofence");
+                List<User> student = eventController.getStudentsOutsideChaperone();
+                System.out.println(student);
+            }
+
+            System.out.println("\nChecking for stale locations");
+            eventController.checkStaleLocations();
+            pauseForOneMinute();
             eventController.updateEventInformation(client);
         }
 
@@ -91,7 +114,7 @@ public class Main {
 
     public static void pauseForOneMinute() {
         try {
-            Thread.sleep(60000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             System.err.println("Sleep interrupted: " + e.getMessage());
             Thread.currentThread().interrupt();

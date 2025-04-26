@@ -15,4 +15,11 @@ public class GoIn2Group {
         return Geofence.DistanceCheck();
     }
 
+    @Override
+    public String toString() {
+        return "GoIn2Group{" +
+                "Student2=" + Student2 +
+                ", Student1=" + Student1 +
+                '}';
+    }
 }

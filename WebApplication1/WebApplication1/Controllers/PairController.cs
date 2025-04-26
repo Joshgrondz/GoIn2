@@ -138,6 +138,28 @@ namespace WebApplication1.Controllers
 
             return Ok(pairsForEvent); // Returns the list of pairs with a 200 OK status
         }
+        [HttpGet("Event/{eventId}/Active")] // Defines the route for this action
+        public async Task<ActionResult<IEnumerable<PairReadDto>>> GetActivePairsByEvent(int eventId)
+        {
+           
+            const bool activeStatus = true;
+
+            
+            var activePairsForEvent = await _context.Pairs
+                .Where(p => p.Eventid == eventId && p.Status == activeStatus) 
+                .Select(p => new PairReadDto 
+                {
+                    Id = p.Id,
+                    Student1id = p.Student1id,
+                    Student2id = p.Student2id,
+                    Eventid = p.Eventid,
+                    Status = p.Status 
+                })
+                .ToListAsync(); 
+
+
+            return Ok(activePairsForEvent);
+        }
 
         private bool PairExists(int id)
         {

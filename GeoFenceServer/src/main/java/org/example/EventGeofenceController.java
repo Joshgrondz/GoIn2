@@ -23,6 +23,7 @@ public class EventGeofenceController {
     public List<GoIn2Group> GoIn2GroupsOutsideFence;
     public List<User> StudentsOutsideChaperone;
     private long stalenessThresholdSeconds = 300; // 5 minutes (Seconds)
+    public float goIn2Distance;
 
     // Establish Event's Geofence
     public EventGeofenceController(User Chaperone, float EventCenterLatitude, float EventCenterLongitude, float EventRadiusFeet, float ChaperoneDistance, float GoIn2Distance) {
@@ -35,6 +36,7 @@ public class EventGeofenceController {
         this.GoIn2GroupsOutsideFence = new ArrayList<GoIn2Group>();
         this.StudentsOutsideChaperone = new ArrayList<User>();
         this.StudentsInEvent = new ArrayList<User>();
+        this.goIn2Distance = GoIn2Distance;
     }
 
     public void addEventData(JSONObject eventInformation){

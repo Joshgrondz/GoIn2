@@ -121,6 +121,24 @@ namespace WebApplication1.Controllers
             return NoContent();
         }
 
+        [HttpGet("Event/{eventId}")] // Defines the route for this action
+        public async Task<ActionResult<IEnumerable<PairReadDto>>> GetPairsByEvent(int eventId)
+        {
+            var pairsForEvent = await _context.Pairs
+                .Where(p => p.Eventid == eventId) 
+                .Select(p => new PairReadDto 
+                {
+                    Id = p.Id,
+                    Student1id = p.Student1id,
+                    Student2id = p.Student2id,
+                    Eventid = p.Eventid, 
+                    Status = p.Status
+                })
+                .ToListAsync(); 
+
+            return Ok(pairsForEvent); // Returns the list of pairs with a 200 OK status
+        }
+
         private bool PairExists(int id)
         {
             return _context.Pairs.Any(e => e.Id == id);

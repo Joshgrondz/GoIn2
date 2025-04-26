@@ -75,8 +75,10 @@ public class Main {
             //update chaperone location
             eventController.updateChaperone(client);
 
-            if(!eventController.allStudentsTracked()){ //Figure
-                eventController.checkWhoIsntBeingTracked(); //Test
+            //Create goIn2 Groups
+
+            if(!eventController.allStudentsTracked()){
+                eventController.checkWhoIsntBeingTracked();
             }
 
 
@@ -85,7 +87,7 @@ public class Main {
                 List<User> student = eventController.getStudentsOutsideFence();
                 System.out.println(student);
             }
-            if(!eventController.checkGoIn2Groups()){ //test
+            if(!eventController.checkGoIn2Groups()){ //test with someone (Maybe once we have location sending done)
                 System.out.println("Students outside of GoIn2Groups");
                 List<GoIn2Group> student = eventController.getGoIn2GroupsOutsideFence();
                 System.out.println(student); //Format this better please

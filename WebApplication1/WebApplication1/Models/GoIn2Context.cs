@@ -50,8 +50,15 @@ public partial class GoIn2Context : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // ⬇️ ADDED this IF statement to protect InMemory usage
+        if (!optionsBuilder.IsConfigured)
+        {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=goin2.database.windows.net;Database=GoIn2;User ID=dbadmin;Password=Bilitski!;Encrypt=True;");
+            optionsBuilder.UseSqlServer("Server=goin2.database.windows.net;Database=GoIn2;User ID=dbadmin;Password=Bilitski!;Encrypt=True;");
+        }
+        // ⬆️ IF the options are already configured (for example to InMemory), it skips setting up SQL Server
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

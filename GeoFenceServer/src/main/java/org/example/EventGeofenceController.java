@@ -198,9 +198,6 @@ public class EventGeofenceController {
         }
     }
 
-
-
-
     // Check Main Geofence
     public boolean checkGeofence() {
         boolean flag = true;

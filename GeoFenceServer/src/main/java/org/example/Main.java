@@ -79,8 +79,6 @@ public class Main {
             //update goin2groups
             eventController.updateGoIn2Groups(client);
 
-            //Create goIn2 Groups
-
             if(!eventController.allStudentsTracked()){
                 eventController.checkWhoIsntBeingTracked();
             }
@@ -91,10 +89,10 @@ public class Main {
                 List<User> student = eventController.getStudentsOutsideFence();
                 System.out.println(student);
             }
-            if(!eventController.checkGoIn2Groups()){ //test with someone (Maybe once we have location sending done)
+            if(!eventController.checkGoIn2Groups()){
                 System.out.println("Students outside of GoIn2Groups");
                 List<GoIn2Group> student = eventController.getGoIn2GroupsOutsideFence();
-                System.out.println(student); //Format this better please
+                System.out.println(student);
             }
             if(!eventController.checkChaperoneGeofence()){
                 System.out.println("Students outside of Chaperone Geofence");
@@ -107,11 +105,11 @@ public class Main {
             pauseForOneMinute();
             eventController.updateEventInformation(client);
         }
-
-
+        client.close();
 
     }
 
+    //Currently set to 5 seconds for testing purposes
     public static void pauseForOneMinute() {
         try {
             Thread.sleep(5000);

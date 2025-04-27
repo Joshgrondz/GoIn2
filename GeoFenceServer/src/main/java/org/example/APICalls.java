@@ -17,7 +17,7 @@ public class APICalls {
 
     private static String BASE_URL = "https://webapplication120250408230542-draxa5ckg5gabacc.canadacentral-01.azurewebsites.net";
     private static final String NOTIFICATION_ENDPOINT = "/api/Notification";
-    private static final String LOG_ENDPOINT = "/api/Log"; // Verify if this path needs a leading '/'
+    private static final String LOG_ENDPOINT = "/api/Log";
 
     public static JSONObject makeGetRequestSingleItem(HttpClient client, String endpoint) throws IOException, InterruptedException, JSONException {
         URI requestUri = URI.create(BASE_URL + endpoint);

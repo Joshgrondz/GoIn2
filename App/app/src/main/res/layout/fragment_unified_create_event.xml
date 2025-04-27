@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/eventFlowRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/flowMainContainer"
+                android:layout_width="407dp"
+                android:layout_height="416dp"
+                android:layout_gravity="center"
+                android:background="@android:color/black"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="24dp" />
+        </FrameLayout>
+    </ScrollView>
+</FrameLayout>

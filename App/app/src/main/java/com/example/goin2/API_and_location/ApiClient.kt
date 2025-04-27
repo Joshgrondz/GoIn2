@@ -7,11 +7,16 @@ import android.util.Log
 import android.widget.Toast
 import com.example.goin2.main.MainActivity
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Response
+import java.io.IOException
+
 
 object ApiClient {
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -95,6 +100,113 @@ object ApiClient {
             } catch (e: Exception) {
                 Log.e("ApiClient", "Ping failed: ${e.message}")
                 mainHandler.post { callback(false) }
+            }
+        }.start()
+    }
+
+    fun getAllClassEvents(callback: (String) -> Unit) {
+        Thread {
+            try {
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/ClassEvent") // <-- fixed to use your correct BASE_URL
+                    .addHeader("accept", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val body = response.body?.string() ?: "[]"
+
+                callback(body)
+            } catch (e: Exception) {
+                callback("[]")
+            }
+        }.start()
+    }
+
+
+    fun getAllClasses(callback: (String) -> Unit) {
+        val url = "$BASE_URL/api/Class"  // <- BASE_URL is already correctly set
+
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("accept", "application/json")
+            .build()
+
+        client.newCall(request).enqueue(object : okhttp3.Callback {
+            override fun onFailure(call: okhttp3.Call, e: IOException) {
+                e.printStackTrace()
+                callback("[]")  // fallback to empty list on failure to avoid freezing
+            }
+
+            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                val body = response.body?.string() ?: "[]"
+                println("DEBUG: getAllClasses received body: $body")  // <<< ADD massive debug print
+                callback(body)
+            }
+        })
+    }
+
+    fun updateEvent(eventId: Int, updatedData: JSONObject, callback: (Boolean) -> Unit) {
+        Thread {
+            try {
+                val body = updatedData.toString().toRequestBody("application/json".toMediaType())
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Event/$eventId")
+                    .put(body)
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val success = response.isSuccessful
+                response.close()
+
+                mainHandler.post { callback(success) }
+            } catch (e: Exception) {
+                Log.e("ApiClient", "updateEvent error: ${e.message}", e)
+                mainHandler.post { callback(false) }
+            }
+        }.start()
+    }
+
+    fun sendNotification(notificationData: JSONObject, callback: (Boolean) -> Unit) {
+        Thread {
+            try {
+                val body = notificationData.toString().toRequestBody("application/json".toMediaType())
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Notification")
+                    .post(body)
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val success = response.isSuccessful
+                response.close()
+
+                mainHandler.post { callback(success) }
+            } catch (e: Exception) {
+                Log.e("ApiClient", "sendNotification error: ${e.message}", e)
+                mainHandler.post { callback(false) }
+            }
+        }.start()
+    }
+
+    fun getAllClassRosters(callback: (String) -> Unit) {
+        Thread {
+            try {
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/ClassRoster")
+                    .get()
+                    .addHeader("accept", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val body = response.body?.string() ?: "[]"
+                response.close()
+
+                mainHandler.post { callback(body) }
+            } catch (e: Exception) {
+                Log.e("ApiClient", "getAllClassRosters error: ${e.message}", e)
+                mainHandler.post { callback("[]") }
             }
         }.start()
     }
@@ -551,6 +663,204 @@ object ApiClient {
             } catch (e: Exception) {
                 Log.e("ApiClient", "getLastKnownLocation exception: ${e.message}", e)
                 mainHandler.post { callback(0.0, 0.0) }
+            }
+        }.start()
+    }
+
+    fun createGeoFence(
+        eventRadius: Int,
+        teacherRadius: Int,
+        pairDistance: Int,
+        latitude: Double,
+        longitude: Double,
+        callback: (Int?) -> Unit
+    ) {
+        Thread {
+            try {
+                val json = JSONObject().apply {
+                    put("eventRadius", eventRadius)
+                    put("teacherRadius", teacherRadius)
+                    put("pairDistance", pairDistance)
+                    put("latitude", latitude)
+                    put("longitude", longitude)
+                }
+
+                val body = json.toString().toRequestBody("application/json".toMediaType())
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/GeoFence")
+                    .post(body)
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val resBody = response.body?.string()
+                response.close()
+
+                val id = resBody?.let { JSONObject(it).getInt("id") }
+                mainHandler.post { callback(id) }
+            } catch (e: Exception) {
+                Log.e("ApiClient", "createGeoFence error: ${e.message}", e)
+                mainHandler.post { callback(null) }
+            }
+        }.start()
+    }
+
+    fun getAllEvents(callback: (String) -> Unit) {
+        Thread {
+            try {
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Event")
+                    .get()
+                    .addHeader("accept", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val body = response.body?.string()
+                response.close()
+
+                mainHandler.post {
+                    callback(body ?: "[]")
+                }
+            } catch (e: Exception) {
+                Log.e("ApiClient", "getAllEvents error: ${e.message}", e)
+                mainHandler.post { callback("[]") }
+            }
+        }.start()
+    }
+
+    fun getGeoFence(id: Int, callback: (String) -> Unit) {
+        Thread {
+            try {
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/GeoFence/$id")
+                    .get()
+                    .addHeader("accept", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val body = response.body?.string()
+                response.close()
+
+                mainHandler.post {
+                    callback(body ?: "{}")
+                }
+            } catch (e: Exception) {
+                Log.e("ApiClient", "getGeoFence error: ${e.message}", e)
+                mainHandler.post { callback("{}") }
+            }
+        }.start()
+    }
+
+    fun getClassEventsByEvent(eventId: Int, callback: (String) -> Unit) {
+        Thread {
+            try {
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/ClassEvent/Event/$eventId")
+                    .get()
+                    .addHeader("accept", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val body = response.body?.string()
+                response.close()
+
+                mainHandler.post {
+                    callback(body ?: "[]")
+                }
+            } catch (e: Exception) {
+                Log.e("ApiClient", "getClassEventsByEvent error: ${e.message}", e)
+                mainHandler.post { callback("[]") }
+            }
+        }.start()
+    }
+
+    fun getClassById(id: Int, callback: (String) -> Unit) {
+        Thread {
+            try {
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Class/$id")
+                    .get()
+                    .addHeader("accept", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val body = response.body?.string()
+                response.close()
+
+                mainHandler.post {
+                    callback(body ?: "{}")
+                }
+            } catch (e: Exception) {
+                Log.e("ApiClient", "getClassById error: ${e.message}", e)
+                mainHandler.post { callback("{}") }
+            }
+        }.start()
+    }
+
+
+
+    fun createEvent(
+        name: String,
+        date: String,
+        location: String,
+        teacherId: Int,
+        geoFenceId: Int,
+        callback: (Int?) -> Unit
+    ) {
+        Thread {
+            try {
+                val json = JSONObject().apply {
+                    put("eventName", name)
+                    put("eventDate", date)
+                    put("eventLocation", location)
+                    put("status", false)
+                    put("teacherid", teacherId)
+                    put("geofenceid", geoFenceId)
+                }
+
+                val body = json.toString().toRequestBody("application/json".toMediaType())
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Event")
+                    .post(body)
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val resBody = response.body?.string()
+                response.close()
+
+                val id = resBody?.let { JSONObject(it).getInt("id") }
+                mainHandler.post { callback(id) }
+            } catch (e: Exception) {
+                Log.e("ApiClient", "createEvent error: ${e.message}", e)
+                mainHandler.post { callback(null) }
+            }
+        }.start()
+    }
+
+    fun linkClassToEvent(classId: Int, eventId: Int, callback: (Boolean) -> Unit) {
+        Thread {
+            try {
+                val json = JSONObject().apply {
+                    put("classid", classId)
+                    put("eventid", eventId)
+                }
+
+                val body = json.toString().toRequestBody("application/json".toMediaType())
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/ClassEvent")
+                    .post(body)
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val success = response.isSuccessful
+                response.close()
+
+                mainHandler.post { callback(success) }
+            } catch (e: Exception) {
+                Log.e("ApiClient", "linkClassToEvent error: ${e.message}", e)
+                mainHandler.post { callback(false) }
             }
         }.start()
     }

@@ -37,6 +37,7 @@ android {
 
 dependencies {
 
+    implementation(libs.picasso)
     implementation(libs.androidx.core.ktx)
     implementation(libs.okhttp)
     implementation(libs.androidx.appcompat)
@@ -44,6 +45,7 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.play.services.maps)
     implementation(libs.filament.android)
+    implementation(libs.androidx.ui.graphics.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

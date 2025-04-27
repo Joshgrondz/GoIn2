@@ -1,5 +1,6 @@
 package com.example.goin2.student
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -14,12 +15,17 @@ class StudentNameSelectActivity : AppCompatActivity() {
     private val client = OkHttpClient()
     private val apiUrlBase = "https://webapplication120250408230542-draxa5ckg5gabacc.canadacentral-01.azurewebsites.net/api/StudentsInEventsView"
 
+    // Declare eventName and eventId as class variables
+    private lateinit var eventName: String
+    private var eventId: Int = -1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_student_name_select)
 
-        val eventName = intent.getStringExtra("eventName") ?: "Unknown Event"
-        val eventId = intent.getIntExtra("eventId", -1)
+        // Initialize eventName and eventId from intent
+        eventName = intent.getStringExtra("eventName") ?: "Unknown Event"
+        eventId = intent.getIntExtra("eventId", -1)
 
         val eventNameText = findViewById<TextView>(R.id.textEventName)
         val studentList = findViewById<LinearLayout>(R.id.studentListContainer)
@@ -27,17 +33,17 @@ class StudentNameSelectActivity : AppCompatActivity() {
         eventNameText.text = "Event: $eventName"
 
         if (eventId != -1) {
-            fetchStudentsForEvent(eventId, studentList)
+            fetchStudentsForEvent(studentList)
         } else {
             Toast.makeText(this, "Invalid event ID", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun fetchStudentsForEvent(eventId: Int, studentList: LinearLayout) {
+    private fun fetchStudentsForEvent(studentList: LinearLayout) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val request = Request.Builder()
-                    .url("$apiUrlBase/$eventId")
+                    .url("$apiUrlBase/$eventId") // Use class variable eventId
                     .build()
 
                 val response = client.newCall(request).execute()
@@ -71,14 +77,13 @@ class StudentNameSelectActivity : AppCompatActivity() {
                                     text = "Select"
                                     layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 0.3f)
                                     setOnClickListener {
-                                        // TODO: Replace this placeholder later with navigation to Student Profile screen
-                                        Toast.makeText(
-                                            this@StudentNameSelectActivity,
-                                            "Student selected",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        val intent = Intent(this@StudentNameSelectActivity, StudentActivityMain::class.java)
+                                        intent.putExtra("eventName", this@StudentNameSelectActivity.eventName) // <-- use CLASS variable
+                                        intent.putExtra("studentName", fullName) // Full name built from firstName + lastName
+                                        startActivity(intent)
                                     }
                                 }
+
 
                                 addView(nameView)
                                 addView(selectButton)

@@ -128,6 +128,25 @@ namespace WebApplication1.Controllers
             return NoContent();
         }
 
+        [HttpGet("Event/{eventId}")]
+        public async Task<ActionResult<IEnumerable<LogReadDto>>> GetLogsByEventId(int eventId)
+        {
+            
+            var logs = await _context.Logs
+                .Where(log => log.Eventid == eventId) 
+                .Select(log => new LogReadDto
+                {
+                    Id = log.Id,
+                    Eventid = log.Eventid,
+                    LogDescription = log.LogDescription,
+                    Timestamp = log.Timestamp
+                })
+                .ToListAsync();
+
+            
+            return logs;
+        }
+
         private bool LogExists(int id)
         {
             return _context.Logs.Any(e => e.Id == id);

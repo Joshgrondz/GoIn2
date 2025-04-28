@@ -161,6 +161,35 @@ namespace WebApplication1.Controllers
             return Ok(activePairsForEvent);
         }
 
+        [HttpGet("Event/{eventId}/Student/{studentId}/Active")]
+        public async Task<ActionResult<PairReadDto>> GetActivePairForStudentInEvent(int eventId, int studentId)
+        {
+            const bool activeStatus = true;
+
+           
+            var activePair = await _context.Pairs
+                .Where(p => p.Eventid == eventId &&
+                            p.Status == activeStatus &&
+                            (p.Student1id == studentId || p.Student2id == studentId))
+                .Select(p => new PairReadDto 
+                {
+                    Id = p.Id,
+                    Student1id = p.Student1id,
+                    Student2id = p.Student2id,
+                    Eventid = p.Eventid,
+                    Status = p.Status
+                })
+                .FirstOrDefaultAsync(); 
+
+            
+            if (activePair == null)
+            {
+                return NotFound($"No active pair found for student {studentId} in event {eventId}.");
+            }
+
+            return Ok(activePair);
+        }
+
         private bool PairExists(int id)
         {
             return _context.Pairs.Any(e => e.Id == id);

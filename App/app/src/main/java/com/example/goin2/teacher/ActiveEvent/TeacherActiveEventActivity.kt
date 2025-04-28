@@ -61,12 +61,13 @@ class TeacherActiveEventActivity : AppCompatActivity() {
 
         val nameView = TextView(this).apply {
             text = eventObj.getString("eventName")
-            textSize = 18f
+            textSize = 24f
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
 
         val toggleButton = Button(this).apply {
             text = if (eventObj.getBoolean("status")) "End Event" else "Start Event"
+            textSize = 18f
             setBackgroundColor(resources.getColor(R.color.purple_200, theme))
             setTextColor(resources.getColor(R.color.white, theme))
             layoutParams = LinearLayout.LayoutParams(
@@ -79,6 +80,7 @@ class TeacherActiveEventActivity : AppCompatActivity() {
 
         val viewButton = Button(this).apply {
             text = "View Event"
+            textSize = 18f
             setBackgroundColor(resources.getColor(R.color.purple_200, theme))
             setTextColor(resources.getColor(R.color.white, theme))
         }

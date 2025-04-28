@@ -40,6 +40,7 @@
         <activity android:name=".teacher.TeacherLoginActivity" android:exported="false" />
         <activity android:name=".student.StudentActivity" android:exported="false" />
         <activity android:name=".teacher.TeacherActivity" android:exported="false" />
+        <activity android:name=".teacher.TeacherActiveEventMap" android:exported="false" />
         <activity android:name=".teacher.CreateClass.TeacherClassManagementActivity" android:exported="false" />
         <activity android:name=".teacher.CreateEvent.TeacherEventCreateActivity" android:exported="false" />
         <activity android:name=".teacher.ActiveEvent.TeacherActiveEventActivity" android:exported="false" />

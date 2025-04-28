@@ -78,8 +78,10 @@ class StudentNameSelectActivity : AppCompatActivity() {
                                     layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 0.3f)
                                     setOnClickListener {
                                         val intent = Intent(this@StudentNameSelectActivity, StudentActivityMain::class.java)
-                                        intent.putExtra("eventName", this@StudentNameSelectActivity.eventName) // <-- use CLASS variable
-                                        intent.putExtra("studentName", fullName) // Full name built from firstName + lastName
+                                        intent.putExtra("eventName", this@StudentNameSelectActivity.eventName)
+                                        intent.putExtra("studentName", fullName)
+                                        intent.putExtra("studentId", studentId)
+                                        intent.putExtra("eventId", eventId)
                                         startActivity(intent)
                                     }
                                 }

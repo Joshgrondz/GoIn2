@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.goin2.R
+import com.example.goin2.teacher.ActiveEvent.TeacherActiveEventActivity
 import com.example.goin2.teacher.CreateClass.TeacherClassManagementActivity
 import com.example.goin2.teacher.CreateEvent.TeacherEventCreateActivity
 

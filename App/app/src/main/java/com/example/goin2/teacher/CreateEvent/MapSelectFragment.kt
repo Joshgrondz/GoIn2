@@ -6,16 +6,13 @@ import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
 import com.example.goin2.R
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import com.google.maps.android.SphericalUtil
 import android.location.Geocoder
 import android.location.Address
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.google.android.gms.maps.model.LatLng
 import java.util.Locale
 
 class MapSelectFragment(private val onSubmit: (LatLng, Int) -> Unit) : Fragment() {
@@ -45,7 +42,6 @@ class MapSelectFragment(private val onSubmit: (LatLng, Int) -> Unit) : Fragment(
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(40.0, -79.0), 14f))
         }
 
-        // Async search (non-blocking Geocoder)
         searchButton.setOnClickListener {
             val query = searchInput.text.toString().trim()
             if (query.isNotEmpty()) {
@@ -58,18 +54,10 @@ class MapSelectFragment(private val onSubmit: (LatLng, Int) -> Unit) : Fragment(
                             requireActivity().runOnUiThread {
                                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
                             }
-                        } else {
-                            requireActivity().runOnUiThread {
-                                Toast.makeText(requireContext(), "Location not found", Toast.LENGTH_SHORT).show()
-                            }
                         }
                     }
 
-                    override fun onError(errorMessage: String?) {
-                        requireActivity().runOnUiThread {
-                            Toast.makeText(requireContext(), "Error: $errorMessage", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+                    override fun onError(errorMessage: String?) {}
                 })
             }
         }
@@ -84,8 +72,9 @@ class MapSelectFragment(private val onSubmit: (LatLng, Int) -> Unit) : Fragment(
             zoomToCircle(center)
         }
 
-        seekBar.max = 450  // range 50–500
+        seekBar.max = 450
         seekBar.progress = radius - 50
+        radiusInput.setText(radius.toString())
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, value: Int, fromUser: Boolean) {
@@ -99,7 +88,6 @@ class MapSelectFragment(private val onSubmit: (LatLng, Int) -> Unit) : Fragment(
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        radiusInput.setText(radius.toString())
         radiusInput.setOnEditorActionListener { _, _, _ ->
             val r = radiusInput.text.toString().toIntOrNull()
             if (r != null && r in 10..10000) {
@@ -112,13 +100,13 @@ class MapSelectFragment(private val onSubmit: (LatLng, Int) -> Unit) : Fragment(
         }
 
         cancelButton.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            parentFragmentManager.popBackStack() // Close overlay
         }
 
         confirmButton.setOnClickListener {
             val pos = marker?.position
             if (pos != null) {
-                onSubmit(pos, radius)
+                onSubmit(pos, radius) // ✅ Send result back
                 parentFragmentManager.popBackStack()
             } else {
                 Toast.makeText(requireContext(), "No location selected", Toast.LENGTH_SHORT).show()

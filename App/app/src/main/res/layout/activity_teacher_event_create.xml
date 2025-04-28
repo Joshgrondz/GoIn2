@@ -1,106 +1,44 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/eventScreenRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:background="@android:color/black">
 
-    <!-- Toolbar (always visible) -->
+    <!-- ✅ Added Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
-        android:paddingTop="20dp"
-        android:titleTextColor="@android:color/white" />
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:layout_gravity="top" />
 
-    <!-- Scrollable Event Creation UI (hidden by default) -->
     <ScrollView
-        android:id="@+id/createEventContainer"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:padding="16dp"
-        android:visibility="gone">
+        android:layout_marginTop="100dp">
 
         <LinearLayout
+            android:id="@+id/eventListContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <!-- Button to open full-screen map -->
-            <Button
-                android:id="@+id/buttonSetMapArea"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Set Location and Boundary"
-                android:layout_marginTop="16dp" />
-
-            <!-- Distance from teacher -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Max Distance from Teacher (2–50m)"
-                android:layout_marginTop="24dp" />
-
-            <SeekBar
-                android:id="@+id/sliderDistanceTeacher"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="48" />
-
-            <EditText
-                android:id="@+id/inputDistanceTeacher"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:hint="Distance from teacher (m)" />
-
-            <!-- Distance between groups -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Max Distance Between Goin2 Groups (2–10m)"
-                android:layout_marginTop="24dp" />
-
-            <SeekBar
-                android:id="@+id/sliderDistanceGroups"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="8" />
-
-            <EditText
-                android:id="@+id/inputDistanceGroups"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:hint="Distance between groups (m)" />
-
-            <!-- Class checkboxes -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Assign Classes"
-                android:layout_marginTop="24dp" />
-
-            <CheckBox
-                android:id="@+id/checkboxClassOne"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Class One" />
-
-            <CheckBox
-                android:id="@+id/checkboxClassTwo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Class Two" />
-
-            <!-- Create button -->
-            <Button
-                android:id="@+id/buttonCreateEvent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Create Event"
-                android:enabled="false"
-                android:layout_marginTop="24dp" />
-        </LinearLayout>
+            android:orientation="vertical"
+            android:layout_marginBottom="80dp" />
     </ScrollView>
-</LinearLayout>
+
+    <ImageButton
+        android:id="@+id/floatingAddEventButton"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@android:drawable/ic_input_add"
+        android:background="@drawable/fab_background"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:contentDescription="Add Event"
+        android:tint="@android:color/white" />
+</FrameLayout>

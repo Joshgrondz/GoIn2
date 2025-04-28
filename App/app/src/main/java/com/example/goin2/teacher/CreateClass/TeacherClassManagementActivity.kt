@@ -10,42 +10,39 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.setPadding
+import com.example.goin2.API_and_location.ApiClient
 import com.example.goin2.R
+import com.example.goin2.main.MainActivity
+import org.json.JSONArray
+import org.json.JSONObject
 
 class TeacherClassManagementActivity : AppCompatActivity() {
 
     private lateinit var container: LinearLayout
-    private val classMap = mutableMapOf<String, MutableList<Student>>()
-
-    data class Student(val firstName: String, val lastName: String)
+    private val classMap = mutableMapOf<Int, MutableList<Pair<Int, String>>>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_teacher_class_management)
 
         container = findViewById(R.id.classListContainer)
-
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
-
         ViewCompat.setOnApplyWindowInsetsListener(toolbar) { view, insets ->
             val topInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top
             view.setPadding(0, topInset, 0, 0)
             insets
         }
-
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Manage Classes"
+
+        buildClassesByTeacher(MainActivity.currentTeacherId)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_teacher_class, menu)
-
-        val item = menu?.findItem(R.id.action_add_class)
-        item?.icon?.setTint(getColor(android.R.color.white))  // or a custom color
-
+        menu?.findItem(R.id.action_add_class)?.icon?.setTint(getColor(android.R.color.white))
         return true
     }
-
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -57,45 +54,110 @@ class TeacherClassManagementActivity : AppCompatActivity() {
         }
     }
 
-    private fun showCreateClassDialog() {
-        val input = EditText(this)
-        input.hint = "Class Name"
-        AlertDialog.Builder(this)
-            .setTitle("Create Class")
-            .setView(input)
-            .setPositiveButton("Submit") { _, _ ->
-                val name = input.text.toString().trim()
-                if (name.isNotEmpty() && !classMap.containsKey(name)) {
-                    classMap[name] = mutableListOf()
-                    addClassView(name)
+    private fun buildClassesByTeacher(teacherId: Int) {
+        container.removeAllViews()
+        classMap.clear()
+        ApiClient.getClassesByTeacher(teacherId) { classList ->
+            classList.forEach { (classId, className) ->
+                classMap[classId] = mutableListOf()
+                ApiClient.getClassRoster(classId) { studentIds ->
+                    if (studentIds.isEmpty()) {
+                        runOnUiThread {
+                            addClassView(classId, className, mutableListOf())
+                        }
+                    } else {
+                        val students = mutableListOf<Pair<Int, String>>()
+                        val remaining = studentIds.toMutableSet()
+
+                        studentIds.forEach { studentId ->
+                            ApiClient.getUserById(studentId) { namePair ->
+                                if (namePair != null) {
+                                    students.add(studentId to "${namePair.first} ${namePair.second}")
+                                }
+                                remaining.remove(studentId)
+
+                                // Once all students are loaded, display
+                                if (remaining.isEmpty()) {
+                                    classMap[classId] = students.toMutableList()
+                                    runOnUiThread {
+                                        addClassView(classId, className, students)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
     }
 
-    private fun showAddStudentDialog(className: String, studentContainer: LinearLayout) {
-        val view = LayoutInflater.from(this).inflate(R.layout.fragment_add_student, null, false)
+
+    private fun showCreateClassDialog() {
+        val fragment = CreateClassFragment {
+            // Refresh the entire view using backend after successful creation
+            buildClassesByTeacher(MainActivity.currentTeacherId)
+        }
+        fragment.show(supportFragmentManager, "createClass")
+    }
+
+
+    private fun showAddStudentDialog(classId: Int, studentContainer: LinearLayout) {
+        val view = LayoutInflater.from(this).inflate(R.layout.fragment_add_student, null)
         val firstInput = view.findViewById<EditText>(R.id.firstNameInput)
         val lastInput = view.findViewById<EditText>(R.id.lastNameInput)
 
-        AlertDialog.Builder(this)
-            .setTitle("Add Student to $className")
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Add Student")
             .setView(view)
-            .setPositiveButton("Submit") { _, _ ->
+            .setPositiveButton("Submit", null) // prevent auto-dismiss
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.setOnShowListener {
+            val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            button.setOnClickListener {
                 val first = firstInput.text.toString().trim()
                 val last = lastInput.text.toString().trim()
-                if (first.isNotEmpty() && last.isNotEmpty()) {
-                    val student = Student(first, last)
-                    classMap[className]?.add(student)
-                    addStudentView(className, student, studentContainer)
+
+                if (first.isEmpty() || last.isEmpty()) {
+                    Toast.makeText(this, "Enter full name", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                button.isEnabled = false
+
+                ApiClient.createStudent(this, first, last) { newId ->
+                    if (newId != null) {
+                        ApiClient.addStudentToClass(classId, newId) { success ->
+                            if (success) {
+                                val fullName = "$first $last"
+                                runOnUiThread {
+                                    classMap[classId]?.add(newId to fullName)
+                                    addStudentView(classId, newId, fullName, studentContainer)
+                                    dialog.dismiss()
+                                }
+                            } else {
+                                runOnUiThread {
+                                    Toast.makeText(this, "Failed to add to class", Toast.LENGTH_SHORT).show()
+                                    button.isEnabled = true
+                                }
+                            }
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(this, "Failed to create student", Toast.LENGTH_SHORT).show()
+                            button.isEnabled = true
+                        }
+                    }
                 }
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+
+        dialog.show()
     }
 
-    private fun addClassView(className: String) {
+
+    private fun addClassView(classId: Int, className: String, students: List<Pair<Int, String>>) {
         val classWrapper = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(8)
@@ -124,10 +186,10 @@ class TeacherClassManagementActivity : AppCompatActivity() {
             text = "+"
             setBackgroundColor(Color.parseColor("#FFBB86FC"))
             setTextColor(Color.WHITE)
-            layoutParams = LinearLayout.LayoutParams((buttonSize*1.5).toInt(), buttonSize).apply {marginEnd = 8 }
+            layoutParams = LinearLayout.LayoutParams((buttonSize * 1.5).toInt(), buttonSize).apply { marginEnd = 8 }
             setOnClickListener {
-                val studentContainer = classWrapper.findViewWithTag<LinearLayout>("students_$className")
-                showAddStudentDialog(className, studentContainer)
+                val studentContainer = classWrapper.findViewWithTag<LinearLayout>("students_$classId")
+                showAddStudentDialog(classId, studentContainer)
             }
         }
 
@@ -135,27 +197,26 @@ class TeacherClassManagementActivity : AppCompatActivity() {
             text = "X"
             setBackgroundColor(Color.rgb(139, 0, 0))
             setTextColor(Color.WHITE)
-            layoutParams = LinearLayout.LayoutParams((buttonSize*1.5).toInt(), buttonSize).apply {marginEnd = 8 }
+            layoutParams = LinearLayout.LayoutParams((buttonSize * 1.5).toInt(), buttonSize).apply { marginEnd = 8 }
             setOnClickListener {
-                classMap.remove(className)
+                classMap.remove(classId)
                 container.removeView(classWrapper)
             }
         }
 
-
         val studentContainer = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             visibility = View.GONE
-            tag = "students_$className"
+            tag = "students_$classId"
         }
 
         header.setOnClickListener {
-            if (studentContainer.visibility == View.GONE) {
-                studentContainer.visibility = View.VISIBLE
+            studentContainer.visibility = if (studentContainer.visibility == View.GONE) {
                 dropdownArrow.text = "▼"
+                View.VISIBLE
             } else {
-                studentContainer.visibility = View.GONE
                 dropdownArrow.text = "▶"
+                View.GONE
             }
         }
 
@@ -168,9 +229,11 @@ class TeacherClassManagementActivity : AppCompatActivity() {
         classWrapper.addView(studentContainer)
 
         container.addView(classWrapper)
+
+        students.forEach { (id, name) -> addStudentView(classId, id, name, studentContainer) }
     }
 
-    private fun addStudentView(className: String, student: Student, container: LinearLayout) {
+    private fun addStudentView(classId: Int, studentId: Int, studentName: String, container: LinearLayout) {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -178,7 +241,7 @@ class TeacherClassManagementActivity : AppCompatActivity() {
         }
 
         val nameView = TextView(this).apply {
-            text = "${student.firstName} ${student.lastName}"
+            text = studentName
             textSize = 16f
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
@@ -189,10 +252,17 @@ class TeacherClassManagementActivity : AppCompatActivity() {
             text = "X"
             setBackgroundColor(Color.rgb(139, 0, 0))
             setTextColor(Color.WHITE)
-            layoutParams = LinearLayout.LayoutParams((buttonSize), buttonSize)
+            layoutParams = LinearLayout.LayoutParams(buttonSize, buttonSize)
+
             setOnClickListener {
-                classMap[className]?.remove(student)
-                container.removeView(row)
+                ApiClient.deleteStudent(studentId) { success ->
+                    if (success) {
+                        classMap[classId]?.removeIf { it.first == studentId }
+                        runOnUiThread { container.removeView(row) }
+                    } else {
+                        Toast.makeText(this@TeacherClassManagementActivity, "Failed to delete student", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
 
@@ -200,4 +270,5 @@ class TeacherClassManagementActivity : AppCompatActivity() {
         row.addView(deleteBtn)
         container.addView(row)
     }
+
 }

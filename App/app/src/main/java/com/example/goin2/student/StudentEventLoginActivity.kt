@@ -51,6 +51,7 @@ class StudentEventLoginActivity : AppCompatActivity() {
                     if (foundEventId != null) {
                         val intent = Intent(this, StudentNameSelectActivity::class.java)
                         intent.putExtra("eventId", foundEventId)
+                        intent.putExtra("eventName", enteredEventName)
                         startActivity(intent)
                     } else {
                         Toast.makeText(this, "Active event not found", Toast.LENGTH_SHORT).show()

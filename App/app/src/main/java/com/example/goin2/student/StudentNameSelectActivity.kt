@@ -14,6 +14,7 @@ import org.json.JSONArray
 
 class StudentNameSelectActivity : AppCompatActivity() {
 
+    private var eventName: String = "Unknown Event"  // 🔥 Added this to store event name properly
     private val studentList = mutableListOf<Pair<Int, String>>() // (userId, fullName)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,6 +22,8 @@ class StudentNameSelectActivity : AppCompatActivity() {
         setContentView(R.layout.activity_student_name_select)
 
         val eventId = intent.getIntExtra("eventId", -1)
+        eventName = intent.getStringExtra("eventName") ?: "Unknown Event" // 🔥 Pull event name here
+
         if (eventId == -1) {
             Toast.makeText(this, "Invalid event", Toast.LENGTH_SHORT).show()
             finish()
@@ -105,9 +108,11 @@ class StudentNameSelectActivity : AppCompatActivity() {
             setOnClickListener {
                 val intent = Intent(this@StudentNameSelectActivity, StudentActivity::class.java)
                 intent.putExtra("student_id", userId)
+                intent.putExtra("eventName", eventName)
 
-                // 🧠 Save global references for disconnect alert later
+                // 🧠 Save important globals immediately
                 MainActivity.currentStudentId = userId
+                MainActivity.currentEventName = eventName  // 🔥 Now we have it set
                 MainActivity.currentStudentFirstName = firstName
                 MainActivity.currentStudentLastName = lastName
 

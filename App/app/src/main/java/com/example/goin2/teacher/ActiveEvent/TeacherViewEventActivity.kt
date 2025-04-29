@@ -3,6 +3,7 @@ package com.example.goin2.teacher.ActiveEvent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.goin2.API_and_location.ApiClient
@@ -23,7 +24,7 @@ class TeacherViewEventActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
     private lateinit var fusedClient: FusedLocationProviderClient
     private var teacherCircle: Circle? = null
-
+    private var eventId: Int = -1
     private lateinit var eventName: String
     private var teacherRadius = 10
     private var eventRadius = 100
@@ -41,9 +42,11 @@ class TeacherViewEventActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_teacher_view_event)
 
+        eventId = intent.getIntExtra("eventId", -1)
         eventName = intent.getStringExtra("eventName") ?: ""
-        if (eventName.isEmpty()) {
-            Log.e("TeacherViewEvent", "❌ No eventName passed")
+
+        if (eventId == -1 || eventName.isEmpty()) {
+            Log.e("TeacherViewEvent", "❌ Missing eventId or eventName")
             finish()
             return
         }
@@ -51,7 +54,31 @@ class TeacherViewEventActivity : AppCompatActivity(), OnMapReadyCallback {
         fusedClient = LocationServices.getFusedLocationProviderClient(this)
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapFragment) as? SupportMapFragment
         mapFragment?.getMapAsync(this)
+
+        findViewById<Button>(R.id.buttonCreateGroup)?.setOnClickListener {
+            val frag = GoIn2GroupFragment(eventId) {
+                Toast.makeText(this, "GoIn2 Pair Created", Toast.LENGTH_SHORT).show()
+            }
+
+            supportFragmentManager.beginTransaction()
+                .add(android.R.id.content, frag)
+                .addToBackStack(null)
+                .commit()
+        }
+
+        findViewById<Button>(R.id.buttonEndGroup)?.setOnClickListener {
+            val frag = EndGoIn2GroupFragment(eventId) {
+                Toast.makeText(this, "Pair ended.", Toast.LENGTH_SHORT).show()
+            }
+
+            supportFragmentManager.beginTransaction()
+                .add(android.R.id.content, frag)
+                .addToBackStack(null)
+                .commit()
+        }
+
     }
+
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap

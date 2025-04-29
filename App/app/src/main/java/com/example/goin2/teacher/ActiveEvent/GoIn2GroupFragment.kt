@@ -63,19 +63,46 @@ class GoIn2GroupFragment(
         submitButton.setOnClickListener {
             if (selectedIds.size == 2) {
                 val (id1, id2) = selectedIds.toList()
-                ApiClient.createGoIn2Pair(id1, id2, eventId) { success ->
+
+                // Before creating, validate against current active pairs
+                ApiClient.getActivePairsForEvent(eventId) { response ->
+                    val pairs = JSONArray(response)
+
+                    var conflict = false
+
+                    for (i in 0 until pairs.length()) {
+                        val obj = pairs.getJSONObject(i)
+                        val existing1 = obj.getInt("student1id")
+                        val existing2 = obj.getInt("student2id")
+
+                        if (existing1 == id1 || existing2 == id1 || existing1 == id2 || existing2 == id2) {
+                            conflict = true
+                            break
+                        }
+                    }
+
                     requireActivity().runOnUiThread {
-                        if (success) {
-                            Toast.makeText(requireContext(), "Pair created!", Toast.LENGTH_SHORT).show()
-                            onSuccess()
-                            parentFragmentManager.popBackStack()
+                        if (conflict) {
+                            Toast.makeText(requireContext(), "❌ One or both students are already in a group", Toast.LENGTH_SHORT).show()
                         } else {
-                            Toast.makeText(requireContext(), "Pairing failed", Toast.LENGTH_SHORT).show()
+                            // No conflict, safe to create
+                            ApiClient.createGoIn2Pair(id1, id2, eventId) { success ->
+                                requireActivity().runOnUiThread {
+                                    if (success) {
+                                        Toast.makeText(requireContext(), "Pair created!", Toast.LENGTH_SHORT).show()
+                                        onSuccess()
+                                        parentFragmentManager.popBackStack()
+                                    } else {
+                                        Toast.makeText(requireContext(), "❌ Pairing failed", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+
 
         loadStudents(listLayout, submitButton)
 

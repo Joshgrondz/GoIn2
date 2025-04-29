@@ -34,7 +34,18 @@ class TeacherViewEventActivity : AppCompatActivity(), OnMapReadyCallback {
     private val locationRunnable = object : Runnable {
         override fun run() {
             updateTeacherLocation()
-            handler.postDelayed(this, 10_000)  // every 10 seconds
+            handler.postDelayed(this, 10_000)
+        }
+    }
+
+    private val studentUpdateHandler = android.os.Handler()
+    private val studentMarkers = mutableMapOf<Int, Marker>()
+    private var showStudents = false
+
+    private val studentUpdateRunnable = object : Runnable {
+        override fun run() {
+            fetchAndDisplayStudentLocations()
+            studentUpdateHandler.postDelayed(this, 60_000)
         }
     }
 
@@ -77,11 +88,41 @@ class TeacherViewEventActivity : AppCompatActivity(), OnMapReadyCallback {
                 .commit()
         }
 
-    }
+        findViewById<Button>(R.id.buttonShowStudents)?.setOnClickListener { view ->
+            val btn = view as Button  // ✅ Cast it manually to Button
 
+            showStudents = !showStudents
+
+            if (showStudents) {
+                btn.text = "Hide Students"
+                studentUpdateHandler.post(studentUpdateRunnable)
+            } else {
+                btn.text = "Show All Students"
+                studentUpdateHandler.removeCallbacks(studentUpdateRunnable)
+                clearStudentMarkers()
+            }
+        }
+
+    }
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+
+        map.uiSettings.apply {
+            isZoomControlsEnabled = false
+            isCompassEnabled = false
+            isMapToolbarEnabled = false
+            isIndoorLevelPickerEnabled = false
+            isTiltGesturesEnabled = false
+            isRotateGesturesEnabled = false
+            isScrollGesturesEnabled = true
+            isZoomGesturesEnabled = true
+        }
+
+        map.setIndoorEnabled(false)
+        map.isBuildingsEnabled = false
+        map.mapType = GoogleMap.MAP_TYPE_NORMAL
+
         loadEventData()
     }
 
@@ -107,8 +148,8 @@ class TeacherViewEventActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 runOnUiThread {
                     drawEventCircle()
-                    zoomToEvent()                      // ✅ Initial zoom to event only
-                    handler.post(locationRunnable)    // 🔁 Start 10s update loop for teacher location
+                    zoomToEvent()
+                    handler.post(locationRunnable)
                 }
             }
         }
@@ -123,6 +164,27 @@ class TeacherViewEventActivity : AppCompatActivity(), OnMapReadyCallback {
                     .strokeColor(0xFFAA66CC.toInt())
                     .fillColor(0x22AA66CC)
             )
+        }
+    }
+
+    private fun zoomToEvent() {
+        val center = eventLatLng ?: return
+        val radius = eventRadius * 1.4
+
+        val bounds = LatLngBounds.builder()
+            .include(SphericalUtil.computeOffset(center, radius.toDouble(), 0.0))
+            .include(SphericalUtil.computeOffset(center, radius.toDouble(), 90.0))
+            .include(SphericalUtil.computeOffset(center, radius.toDouble(), 180.0))
+            .include(SphericalUtil.computeOffset(center, radius.toDouble(), 270.0))
+            .build()
+
+        map.setOnMapLoadedCallback {
+            try {
+                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
+                Log.d("ZoomToEvent", "✅ Zoomed to event radius with +40% padding")
+            } catch (e: Exception) {
+                Log.e("ZoomToEvent", "❌ Zoom failed: ${e.message}")
+            }
         }
     }
 
@@ -153,34 +215,58 @@ class TeacherViewEventActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    private fun fetchAndDisplayStudentLocations() {
+        ApiClient.getAllClassEvents { classEventBody ->
+            val classIds = mutableSetOf<Int>()
+            val entries = JSONArray(classEventBody)
+            for (i in 0 until entries.length()) {
+                val obj = entries.getJSONObject(i)
+                if (obj.getInt("eventid") == eventId) {
+                    classIds.add(obj.getInt("classid"))
+                }
+            }
 
+            if (classIds.isEmpty()) return@getAllClassEvents
 
-    private fun zoomToEvent() {
-        val center = eventLatLng ?: return
-        val radius = eventRadius * 1.4  // +40%
+            ApiClient.getAllClassRosters { rosterBody ->
+                val rosters = JSONArray(rosterBody)
+                val studentIds = mutableSetOf<Int>()
+                for (i in 0 until rosters.length()) {
+                    val obj = rosters.getJSONObject(i)
+                    if (classIds.contains(obj.getInt("classid"))) {
+                        studentIds.add(obj.getInt("studentid"))
+                    }
+                }
 
-        val bounds = LatLngBounds.builder()
-            .include(SphericalUtil.computeOffset(center, radius.toDouble(), 0.0))    // North
-            .include(SphericalUtil.computeOffset(center, radius.toDouble(), 90.0))   // East
-            .include(SphericalUtil.computeOffset(center, radius.toDouble(), 180.0))  // South
-            .include(SphericalUtil.computeOffset(center, radius.toDouble(), 270.0))  // West
-            .build()
+                for (id in studentIds) {
+                    ApiClient.getLastKnownLocation(id) { lat, lng ->
+                        if (lat == 0.0 && lng == 0.0) return@getLastKnownLocation
+                        runOnUiThread {
+                            studentMarkers[id]?.remove()
 
-        map.setOnMapLoadedCallback {
-            try {
-                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
-                Log.d("ZoomToEvent", "✅ Zoomed to event radius with +40% padding")
-            } catch (e: Exception) {
-                Log.e("ZoomToEvent", "❌ Zoom failed: ${e.message}")
+                            studentMarkers[id] = map.addMarker(
+                                MarkerOptions()
+                                    .position(LatLng(lat, lng))
+                                    .title("Student $id")
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                            )!!
+                        }
+                    }
+                }
             }
         }
     }
 
-
-
+    private fun clearStudentMarkers() {
+        for ((_, marker) in studentMarkers) {
+            marker.remove()
+        }
+        studentMarkers.clear()
+    }
 
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(locationRunnable)
+        studentUpdateHandler.removeCallbacks(studentUpdateRunnable)
     }
 }

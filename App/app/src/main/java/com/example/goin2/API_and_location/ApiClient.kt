@@ -211,12 +211,72 @@ object ApiClient {
         }.start()
     }
 
+    fun postLocation(payload: JSONObject) {
+        Thread {
+            try {
+                val requestBody = payload.toString().toRequestBody("application/json".toMediaType())
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Location")
+                    .post(requestBody)
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                Log.d("ApiClient", "postLocation response: ${response.code}")
+                response.close()
+            } catch (e: Exception) {
+                Log.e("ApiClient", "postLocation exception: ${e.message}", e)
+            }
+        }.start()
+    }
+
+    fun getNotificationsByUser(userId: Int, callback: (List<NotificationResult>) -> Unit) {
+        Thread {
+            try {
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Notification/user/$userId")
+                    .get()
+                    .addHeader("accept", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val body = response.body?.string()
+                response.close()
+
+                if (body.isNullOrEmpty()) {
+                    mainHandler.post { callback(emptyList()) }
+                    return@Thread
+                }
+
+                val resultList = mutableListOf<NotificationResult>()
+                val jsonArray = JSONArray(body)
+
+                for (i in 0 until jsonArray.length()) {
+                    val obj = jsonArray.getJSONObject(i)
+                    resultList.add(
+                        NotificationResult(
+                            id = obj.getInt("id"),
+                            userid = obj.getInt("userid"),
+                            eventid = obj.getInt("eventid"),
+                            notificationDescription = obj.getString("notificationDescription"),
+                            notificationTimestamp = obj.getString("notificationTimestamp")
+                        )
+                    )
+                }
+
+                mainHandler.post { callback(resultList) }
+
+            } catch (e: Exception) {
+                Log.e("ApiClient", "getNotificationsByUser exception: ${e.message}", e)
+                mainHandler.post { callback(emptyList()) }
+            }
+        }.start()
+    }
 
     fun sendLocation(location: LocationPayload) {
         Thread {
             try {
                 val json = JSONObject().apply {
-                    put("id", 0)
                     put("userid", location.userid)
                     put("latitude", location.latitude)
                     put("longitude", location.longitude)
@@ -226,7 +286,6 @@ object ApiClient {
                     put("locBearing", location.locBearing)
                     put("locProvider", location.locProvider)
                     put("timestampMs", location.timestampMs)
-                    put("user", location.user)
                 }
 
                 val requestBody = json.toString().toRequestBody("application/json".toMediaType())
@@ -244,6 +303,7 @@ object ApiClient {
             }
         }.start()
     }
+
 
 
     fun getStudents(callback: (String) -> Unit) {

@@ -1,5 +1,6 @@
 package com.example.goin2.teacher.ActiveEvent
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.*
@@ -119,8 +120,13 @@ class TeacherActiveEventActivity : AppCompatActivity() {
         }
 
         viewButton.setOnClickListener {
-            Toast.makeText(this, "TODO: View Event", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, TeacherViewEventActivity::class.java)
+            intent.putExtra("eventId", eventObj.getInt("id"))
+            intent.putExtra("eventName", eventObj.getString("eventName"))
+            intent.putExtra("geofenceId", eventObj.getInt("geofenceid"))
+            startActivity(intent)
         }
+
     }
 
     private fun sendEndNotifications(eventId: Int, eventName: String) {

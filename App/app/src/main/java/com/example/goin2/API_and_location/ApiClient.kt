@@ -190,6 +190,59 @@ object ApiClient {
         }.start()
     }
 
+    fun getActivePair(eventId: Int, studentId: Int, callback: (JSONObject?) -> Unit) {
+        Thread {
+            try {
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Pair/Event/$eventId/Student/$studentId/Active")
+                    .addHeader("accept", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val body = response.body?.string()
+
+                if (response.isSuccessful && !body.isNullOrEmpty()) {
+                    callback(JSONObject(body))
+                } else {
+                    callback(null)
+                }
+
+                response.close()
+            } catch (e: Exception) {
+                Log.e("ApiClient", "getActivePair error: ${e.message}", e)
+                callback(null)
+            }
+        }.start()
+    }
+
+    fun getBuddyName(userId: Int, callback: (String?) -> Unit) {
+        Thread {
+            try {
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/User/$userId")
+                    .addHeader("accept", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val body = response.body?.string()
+
+                if (!body.isNullOrEmpty()) {
+                    val obj = JSONObject(body)
+                    val name = "${obj.optString("firstName", "")} ${obj.optString("lastName", "")}".trim()
+                    callback(name)
+                } else {
+                    callback(null)
+                }
+
+                response.close()
+            } catch (e: Exception) {
+                Log.e("ApiClient", "getBuddyName error: ${e.message}", e)
+                callback(null)
+            }
+        }.start()
+    }
+
+
     fun getAllClassRosters(callback: (String) -> Unit) {
         Thread {
             try {
@@ -697,11 +750,11 @@ object ApiClient {
 
 
 
-    fun getLastKnownLocation(studentId: Int = 7, callback: (Double, Double) -> Unit) {
+    fun getLastKnownLocation(userId: Int, callback: (Double, Double) -> Unit) {
         Thread {
             try {
                 val request = Request.Builder()
-                    .url("$BASE_URL/api/Location/LastKnown/$studentId")
+                    .url("$BASE_URL/api/Location/latest/$userId")
                     .addHeader("accept", "application/json")
                     .build()
 
@@ -726,6 +779,7 @@ object ApiClient {
             }
         }.start()
     }
+
 
     fun createGeoFence(
         eventRadius: Int,

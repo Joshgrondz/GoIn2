@@ -44,6 +44,8 @@
         <activity android:name=".teacher.CreateClass.TeacherClassManagementActivity" android:exported="false" />
         <activity android:name=".teacher.CreateEvent.TeacherEventCreateActivity" android:exported="false" />
         <activity android:name=".teacher.ActiveEvent.TeacherActiveEventActivity" android:exported="false" />
+        <activity android:name=".teacher.TeacherActiveEventActivity" android:exported="false" />
+        <activity android:name=".student.StudentActivityMain" android:exported="false" />
 
         <service
             android:name=".API_and_location.LocationService"

@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using WebApplication1.Database;
+using WebApplication1.Models;
 using Microsoft.OpenApi.Models;
+using WebApplication1.Controllers;
+using WebApplication1.Dto;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +23,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Register DbContext
-builder.Services.AddDbContext<TableContext>(options =>
+builder.Services.AddDbContext<GoIn2Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();

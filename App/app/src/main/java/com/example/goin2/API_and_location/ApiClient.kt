@@ -748,6 +748,75 @@ object ApiClient {
         }.start()
     }
 
+    fun getActivePairsForEvent(eventId: Int, callback: (String) -> Unit) {
+        Thread {
+            try {
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Pair/Event/$eventId/Active")
+                    .addHeader("accept", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val body = response.body?.string() ?: ""
+                response.close()
+                mainHandler.post { callback(body) }
+            } catch (e: Exception) {
+                mainHandler.post { callback("") }
+            }
+        }.start()
+    }
+
+    fun updateGoIn2Pair(pairId: Int, payload: JSONObject, callback: (Boolean) -> Unit) {
+        Thread {
+            try {
+                val body = payload.toString().toRequestBody("application/json".toMediaType())
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Pair/$pairId")
+                    .put(body)
+                    .addHeader("accept", "application/json")
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val success = response.isSuccessful
+                response.close()
+                mainHandler.post { callback(success) }
+            } catch (e: Exception) {
+                mainHandler.post { callback(false) }
+            }
+        }.start()
+    }
+
+
+
+    fun createGoIn2Pair(student1Id: Int, student2Id: Int, eventId: Int, callback: (Boolean) -> Unit) {
+        Thread {
+            try {
+                val json = JSONObject()
+                json.put("student1id", student1Id)
+                json.put("student2id", student2Id)
+                json.put("eventid", eventId)
+                json.put("status", true)
+
+                val body = json.toString().toRequestBody("application/json".toMediaType())
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Pair")
+                    .post(body)
+                    .addHeader("accept", "application/json")
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val success = response.isSuccessful
+                response.close()
+
+                mainHandler.post { callback(success) }
+            } catch (e: Exception) {
+                Log.e("ApiClient", "createGoIn2Pair failed: ${e.message}", e)
+                mainHandler.post { callback(false) }
+            }
+        }.start()
+    }
 
 
     fun getLastKnownLocation(userId: Int, callback: (Double, Double) -> Unit) {

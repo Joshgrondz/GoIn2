@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@android:color/black"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/textViewEventName"
+        android:layout_width="322dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:background="@color/purple_200"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="Event: "
+        android:textAlignment="center"
+        android:textColor="@android:color/black"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/textViewStudentName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Student: "
+        android:textAlignment="center"
+        android:gravity="center"
+        android:textSize="22sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="24dp"/>
+
+    <TextView
+        android:id="@+id/textViewPairedStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You are not currently paired."
+        android:textAlignment="center"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:textColor="@android:color/white" />
+
+    <!-- ✅ New Square Map Fragment at Bottom -->
+    <fragment
+        android:id="@+id/studentMapFragment"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="24dp" />
+</LinearLayout>

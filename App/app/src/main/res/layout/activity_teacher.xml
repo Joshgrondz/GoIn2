@@ -9,7 +9,7 @@
         android:id="@+id/buttonAddStudents"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Students" />
+        android:text="Manage Students" />
 
     <Button
         android:id="@+id/buttonCreateEvent"

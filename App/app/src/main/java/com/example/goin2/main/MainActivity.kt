@@ -21,8 +21,11 @@ import com.example.goin2.student.StudentEventLoginActivity
 class MainActivity : AppCompatActivity() {
 
     companion object {
+        var currentEventId: Int = 0
         var currentTeacherId: Int = 0
         var currentStudentId: Int = 7
+        var currentStudentFirstName: String? = null
+        var currentStudentLastName: String? = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

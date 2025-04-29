@@ -1,7 +1,6 @@
 package com.example.goin2.API_and_location
 
 data class LocationPayload(
-    val id: Int = 0,
     val userid: Int,
     val latitude: Double,
     val longitude: Double,
@@ -10,6 +9,13 @@ data class LocationPayload(
     val locSpeed: Float,
     val locBearing: Float,
     val locProvider: String,
-    val timestampMs: Long,
-    val user: String  // "student" or "teacher"
+    val timestampMs: Long
+)
+
+data class NotificationResult(
+    val id: Int,
+    val userid: Int,
+    val eventid: Int,
+    val notificationDescription: String,
+    val notificationTimestamp: String
 )

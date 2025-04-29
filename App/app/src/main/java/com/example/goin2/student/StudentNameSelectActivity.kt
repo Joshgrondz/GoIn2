@@ -2,51 +2,121 @@ package com.example.goin2.student
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.*
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.goin2.API_and_location.ApiClient
 import com.example.goin2.R
+import com.example.goin2.main.MainActivity
+import org.json.JSONArray
 
 class StudentNameSelectActivity : AppCompatActivity() {
 
-    private val dummyStudents = listOf("Alice Johnson", "Bob Smith", "Charlie Lee")
+    private val studentList = mutableListOf<Pair<Int, String>>() // (userId, fullName)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_student_name_select)
 
-        val eventName = intent.getStringExtra("eventName") ?: "Unknown Event"
+        val eventId = intent.getIntExtra("eventId", -1)
+        if (eventId == -1) {
+            Toast.makeText(this, "Invalid event", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
         val eventNameText = findViewById<TextView>(R.id.textEventName)
-        val studentList = findViewById<LinearLayout>(R.id.studentListContainer)
+        val studentListContainer = findViewById<LinearLayout>(R.id.studentListContainer)
 
-        eventNameText.text = "Event: $eventName"
+        eventNameText.text = "Select Your Name"
 
-        dummyStudents.forEachIndexed { index, name ->
-            val row = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setPadding(0, 12, 0, 12)
-                weightSum = 1f
+        loadStudents(eventId, studentListContainer)
+    }
 
-                val nameView = TextView(this@StudentNameSelectActivity).apply {
-                    text = name
-                    textSize = 20f
-                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 0.7f)
+    private fun loadStudents(eventId: Int, container: LinearLayout) {
+        ApiClient.getAllClassEvents { classEventBody ->
+            val classEventList = JSONArray(classEventBody)
+            val classIds = mutableSetOf<Int>()
+
+            for (i in 0 until classEventList.length()) {
+                val obj = classEventList.getJSONObject(i)
+                if (obj.getInt("eventid") == eventId) {
+                    classIds.add(obj.getInt("classid"))
                 }
+            }
 
-                val loginButton = Button(this@StudentNameSelectActivity).apply {
-                    text = "Login"
-                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 0.3f)
-                    setOnClickListener {
-                        val intent = Intent(this@StudentNameSelectActivity, StudentActivity::class.java)
-                        intent.putExtra("student_id", index + 1)
-                        startActivity(intent)
+            if (classIds.isEmpty()) {
+                runOnUiThread {
+                    Toast.makeText(this, "No classes linked to this event.", Toast.LENGTH_SHORT).show()
+                }
+                return@getAllClassEvents
+            }
+
+            ApiClient.getAllClassRosters { rosterBody ->
+                val rosterList = JSONArray(rosterBody)
+                val studentIds = mutableSetOf<Int>()
+
+                for (i in 0 until rosterList.length()) {
+                    val obj = rosterList.getJSONObject(i)
+                    if (classIds.contains(obj.getInt("classid"))) {
+                        studentIds.add(obj.getInt("studentid"))
                     }
                 }
 
-                addView(nameView)
-                addView(loginButton)
-            }
+                if (studentIds.isEmpty()) {
+                    runOnUiThread {
+                        Toast.makeText(this, "No students found.", Toast.LENGTH_SHORT).show()
+                    }
+                    return@getAllClassRosters
+                }
 
-            studentList.addView(row)
+                for (studentId in studentIds) {
+                    ApiClient.getUserById(studentId) { namePair ->
+                        if (namePair != null) {
+                            val (firstName, lastName) = namePair
+                            runOnUiThread {
+                                addStudentRow(container, studentId, firstName, lastName)
+                            }
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    private fun addStudentRow(container: LinearLayout, userId: Int, firstName: String, lastName: String) {
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(0, 12, 0, 12)
+            weightSum = 1f
+        }
+
+        val nameView = TextView(this).apply {
+            text = "$firstName $lastName"
+            textSize = 20f
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 0.7f)
+        }
+
+        val loginButton = Button(this).apply {
+            text = "Login"
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 0.3f)
+            setOnClickListener {
+                val intent = Intent(this@StudentNameSelectActivity, StudentActivity::class.java)
+                intent.putExtra("student_id", userId)
+
+                // 🧠 Save global references for disconnect alert later
+                MainActivity.currentStudentId = userId
+                MainActivity.currentStudentFirstName = firstName
+                MainActivity.currentStudentLastName = lastName
+
+                startActivity(intent)
+            }
+        }
+
+        row.addView(nameView)
+        row.addView(loginButton)
+        container.addView(row)
     }
 }

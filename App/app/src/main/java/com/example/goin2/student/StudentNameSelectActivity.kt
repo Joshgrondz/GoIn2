@@ -119,8 +119,12 @@ class StudentNameSelectActivity : AppCompatActivity() {
                 startForegroundService(serviceIntent)
 
                 // Transition to StudentActivity
-                val intent = Intent(this@StudentNameSelectActivity, StudentActivity::class.java)
+                val intent = Intent(this@StudentNameSelectActivity, StudentActivity::class.java).apply {
+                    putExtra("eventName", eventName)
+                }
+                MainActivity.currentEventName = eventName
                 startActivity(intent)
+
             }
         }
 

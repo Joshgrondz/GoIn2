@@ -238,21 +238,29 @@ class TeacherViewEventActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                 }
 
+                // 🔥 Clear all previous student markers before adding new ones
+                runOnUiThread {
+                    clearStudentMarkers()
+                }
+
+                // 🔁 Re-fetch and redraw new student markers
                 for (id in studentIds) {
                     ApiClient.getLastKnownLocation(id) { lat, lng ->
                         if (lat == 0.0 && lng == 0.0) return@getLastKnownLocation
                         runOnUiThread {
-                            studentMarkers[id]?.remove()
-
-                            studentMarkers[id] = map.addMarker(
+                            val marker = map.addMarker(
                                 MarkerOptions()
                                     .position(LatLng(lat, lng))
                                     .title("Student $id")
                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
-                            )!!
+                            )
+                            if (marker != null) {
+                                studentMarkers[id] = marker
+                            }
                         }
                     }
                 }
+
             }
         }
     }

@@ -13,8 +13,6 @@ import androidx.core.view.setPadding
 import com.example.goin2.API_and_location.ApiClient
 import com.example.goin2.R
 import com.example.goin2.main.MainActivity
-import org.json.JSONArray
-import org.json.JSONObject
 
 class TeacherClassManagementActivity : AppCompatActivity() {
 
@@ -28,8 +26,7 @@ class TeacherClassManagementActivity : AppCompatActivity() {
         container = findViewById(R.id.classListContainer)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         ViewCompat.setOnApplyWindowInsetsListener(toolbar) { view, insets ->
-            val topInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top
-            view.setPadding(0, topInset, 0, 0)
+            view.setPadding(0, insets.getInsets(WindowInsetsCompat.Type.systemBars()).top, 0, 0)
             insets
         }
         setSupportActionBar(toolbar)
@@ -57,26 +54,24 @@ class TeacherClassManagementActivity : AppCompatActivity() {
     private fun buildClassesByTeacher(teacherId: Int) {
         container.removeAllViews()
         classMap.clear()
+
         ApiClient.getClassesByTeacher(teacherId) { classList ->
             classList.forEach { (classId, className) ->
                 classMap[classId] = mutableListOf()
                 ApiClient.getClassRoster(classId) { studentIds ->
+                    val students = mutableListOf<Pair<Int, String>>()
+                    val remaining = studentIds.toMutableSet()
+
                     if (studentIds.isEmpty()) {
                         runOnUiThread {
-                            addClassView(classId, className, mutableListOf())
+                            addClassView(classId, className, students)
                         }
                     } else {
-                        val students = mutableListOf<Pair<Int, String>>()
-                        val remaining = studentIds.toMutableSet()
-
                         studentIds.forEach { studentId ->
                             ApiClient.getUserById(studentId) { namePair ->
-                                if (namePair != null) {
-                                    students.add(studentId to "${namePair.first} ${namePair.second}")
-                                }
+                                namePair?.let { students.add(studentId to "${it.first} ${it.second}") }
                                 remaining.remove(studentId)
 
-                                // Once all students are loaded, display
                                 if (remaining.isEmpty()) {
                                     classMap[classId] = students.toMutableList()
                                     runOnUiThread {
@@ -91,25 +86,22 @@ class TeacherClassManagementActivity : AppCompatActivity() {
         }
     }
 
-
     private fun showCreateClassDialog() {
         val fragment = CreateClassFragment {
-            // Refresh the entire view using backend after successful creation
             buildClassesByTeacher(MainActivity.currentTeacherId)
         }
         fragment.show(supportFragmentManager, "createClass")
     }
 
-
     private fun showAddStudentDialog(classId: Int, studentContainer: LinearLayout) {
-        val view = LayoutInflater.from(this).inflate(R.layout.fragment_add_student, null)
+        val view = layoutInflater.inflate(R.layout.fragment_add_student, null)
         val firstInput = view.findViewById<EditText>(R.id.firstNameInput)
         val lastInput = view.findViewById<EditText>(R.id.lastNameInput)
 
         val dialog = AlertDialog.Builder(this)
             .setTitle("Add Student")
             .setView(view)
-            .setPositiveButton("Submit", null) // prevent auto-dismiss
+            .setPositiveButton("Submit", null)
             .setNegativeButton("Cancel", null)
             .create()
 
@@ -156,7 +148,6 @@ class TeacherClassManagementActivity : AppCompatActivity() {
         dialog.show()
     }
 
-
     private fun addClassView(classId: Int, className: String, students: List<Pair<Int, String>>) {
         val classWrapper = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -199,8 +190,17 @@ class TeacherClassManagementActivity : AppCompatActivity() {
             setTextColor(Color.WHITE)
             layoutParams = LinearLayout.LayoutParams((buttonSize * 1.5).toInt(), buttonSize).apply { marginEnd = 8 }
             setOnClickListener {
-                classMap.remove(classId)
-                container.removeView(classWrapper)
+                ApiClient.deleteClass(classId) { success ->
+                    runOnUiThread {
+                        if (success) {
+                            classMap.remove(classId)
+                            container.removeView(classWrapper)
+                            Toast.makeText(this@TeacherClassManagementActivity, "Class deleted", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@TeacherClassManagementActivity, "Failed to delete class", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             }
         }
 
@@ -227,7 +227,6 @@ class TeacherClassManagementActivity : AppCompatActivity() {
 
         classWrapper.addView(header)
         classWrapper.addView(studentContainer)
-
         container.addView(classWrapper)
 
         students.forEach { (id, name) -> addStudentView(classId, id, name, studentContainer) }
@@ -253,14 +252,15 @@ class TeacherClassManagementActivity : AppCompatActivity() {
             setBackgroundColor(Color.rgb(139, 0, 0))
             setTextColor(Color.WHITE)
             layoutParams = LinearLayout.LayoutParams(buttonSize, buttonSize)
-
             setOnClickListener {
                 ApiClient.deleteStudent(studentId) { success ->
-                    if (success) {
-                        classMap[classId]?.removeIf { it.first == studentId }
-                        runOnUiThread { container.removeView(row) }
-                    } else {
-                        Toast.makeText(this@TeacherClassManagementActivity, "Failed to delete student", Toast.LENGTH_SHORT).show()
+                    runOnUiThread {
+                        if (success) {
+                            classMap[classId]?.removeIf { it.first == studentId }
+                            container.removeView(row)
+                        } else {
+                            Toast.makeText(this@TeacherClassManagementActivity, "Failed to delete student", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
@@ -270,5 +270,4 @@ class TeacherClassManagementActivity : AppCompatActivity() {
         row.addView(deleteBtn)
         container.addView(row)
     }
-
 }

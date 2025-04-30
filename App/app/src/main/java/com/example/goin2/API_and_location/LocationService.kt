@@ -123,7 +123,7 @@ class LocationService : Service() {
                 val serverTime = parseServerTime(mostRecent.notificationTimestamp)
                 val now = System.currentTimeMillis()
 
-                if (serverTime != null && now - serverTime <= 2 * 60 * 60 * 1000) { // within 2 hours
+                if (serverTime != null && now - serverTime <= 10 * 60 * 1000) { // within 10 minutes
                     if (mostRecent.notificationTimestamp != lastNotificationTimestamp) {
                         showLocalNotification(mostRecent.notificationDescription)
                         lastNotificationTimestamp = mostRecent.notificationTimestamp

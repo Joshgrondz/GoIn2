@@ -1021,6 +1021,32 @@ object ApiClient {
         }.start()
     }
 
+    fun deleteClass(classId: Int, callback: (Boolean) -> Unit) {
+        Thread {
+            try {
+                val request = Request.Builder()
+                    .url("$BASE_URL/api/Class/$classId")
+                    .delete()
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
+                val statusCode = response.code
+
+                Log.d("DELETE_CLASS", "DELETE /api/Class/$classId → HTTP $statusCode, body: $responseBody")
+
+                val success = response.isSuccessful
+                response.close()
+                mainHandler.post { callback(success) }
+            } catch (e: Exception) {
+                Log.e("DELETE_CLASS", "Error: ${e.message}", e)
+                mainHandler.post { callback(false) }
+            }
+        }.start()
+    }
+
+
+
     fun linkClassToEvent(classId: Int, eventId: Int, callback: (Boolean) -> Unit) {
         Thread {
             try {

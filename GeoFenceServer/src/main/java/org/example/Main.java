@@ -26,7 +26,7 @@ public class Main {
     // Time in minutes a student must be outside a boundary before student notification
     private static final long STUDENT_NOTIFICATION_THRESHOLD_MINUTES = 1;
     // Time in minutes a student/group must be outside a boundary before chaperone notification
-    private static final long CHAPERONE_NOTIFICATION_THRESHOLD_MINUTES = 3;
+    private static final long CHAPERONE_NOTIFICATION_THRESHOLD_MINUTES = 1;
     // Pause duration between checks in milliseconds (e.g., 30000 = 30 seconds)
     private static final long SERVER_PAUSE_MILLISECONDS = 30000;
     // Pause duration when waiting for event to start in milliseconds (e.g., 60000 = 1 minute)

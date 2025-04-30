@@ -112,50 +112,56 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClass(int id)
         {
-            var classEntity = await _context.Classes.FindAsync(id);
-            if (classEntity == null)
+            try
             {
-                return NotFound();
-            }
+                var classEntity = await _context.Classes.FindAsync(id);
+                if (classEntity == null)
+                    return NotFound();
 
-            // Get all student IDs linked to the class
-            var rosterEntries = await _context.ClassRosters
-                .Where(cr => cr.Classid == id)
-                .ToListAsync();
+                // Step 1: Remove all ClassEvent entries tied to this class
+                var classEvents = await _context.ClassEvents
+                    .Where(ce => ce.Classid == id)
+                    .ToListAsync();
+                _context.ClassEvents.RemoveRange(classEvents);
 
-            var studentIds = rosterEntries.Select(r => r.Studentid).Distinct().ToList();
+                // Step 2: Get students in the class
+                var rosterEntries = await _context.ClassRosters
+                    .Where(cr => cr.Classid == id)
+                    .ToListAsync();
+                var studentIds = rosterEntries.Select(r => r.Studentid).Distinct().ToList();
+                _context.ClassRosters.RemoveRange(rosterEntries);
 
-            // Remove the roster entries first
-            _context.ClassRosters.RemoveRange(rosterEntries);
-
-            // Then delete all users + student profiles tied to those student IDs
-            foreach (var studentId in studentIds)
-            {
-                var user = await _context.Users.FindAsync(studentId);
-                if (user != null && user.UserType.ToLower() == "student")
+                // Step 3: Delete users, student profiles, etc.
+                foreach (var studentId in studentIds)
                 {
-                    // This mimics what your User DELETE already does
-                    _context.Pairs.RemoveRange(_context.Pairs.Where(p => p.Student1id == studentId || p.Student2id == studentId));
-                    _context.Locations.RemoveRange(_context.Locations.Where(l => l.Userid == studentId));
-                    _context.Notifications.RemoveRange(_context.Notifications.Where(n => n.Userid == studentId));
-                    
-
-                    var studentProfile = await _context.StudentProfiles.FindAsync(studentId);
-                    if (studentProfile != null)
+                    var user = await _context.Users.FindAsync(studentId);
+                    if (user != null && user.UserType?.ToLower() == "student")
                     {
-                        _context.StudentProfiles.Remove(studentProfile);
+                        _context.Pairs.RemoveRange(_context.Pairs.Where(p => p.Student1id == studentId || p.Student2id == studentId));
+                        _context.Locations.RemoveRange(_context.Locations.Where(l => l.Userid == studentId));
+                        _context.Notifications.RemoveRange(_context.Notifications.Where(n => n.Userid == studentId));
+
+                        var studentProfile = await _context.StudentProfiles.FindAsync(studentId);
+                        if (studentProfile != null)
+                        {
+                            _context.StudentProfiles.Remove(studentProfile);
+                        }
+
+                        _context.Users.Remove(user);
                     }
-
-                    _context.Users.Remove(user);
                 }
+
+                // Step 4: Finally delete the class
+                _context.Classes.Remove(classEntity);
+
+                await _context.SaveChangesAsync();
+                return NoContent();
             }
-
-            // Now finally remove the class itself
-            _context.Classes.Remove(classEntity);
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] Failed to delete class {id}: {ex.Message}");
+                return StatusCode(500, "An internal server error occurred.");
+            }
         }
 
 

@@ -23,8 +23,8 @@ class UnifiedCreateEventFragment(private val onComplete: () -> Unit) : Fragment(
     private var eventLocationText = ""
     private var center: LatLng? = null
     private var radius: Int = 0
-    private var teacherRadius: Int = 2
-    private var pairDistance: Int = 2
+    private var teacherRadius: Int = 10
+    private var pairDistance: Int = 10
     private val selectedClassIds = mutableSetOf<Int>()
 
     override fun onCreateView(
@@ -40,7 +40,6 @@ class UnifiedCreateEventFragment(private val onComplete: () -> Unit) : Fragment(
         loadStepOne()
         return view
     }
-
 
     private fun clearContent() {
         content.removeAllViews()
@@ -80,8 +79,7 @@ class UnifiedCreateEventFragment(private val onComplete: () -> Unit) : Fragment(
             val name = nameInput.text.toString().trim()
             val location = locInput.text.toString().trim()
             if (name.isEmpty() || location.isEmpty()) {
-                Toast.makeText(requireContext(), "Please fill out both fields", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(requireContext(), "Please fill out both fields", Toast.LENGTH_SHORT).show()
             } else {
                 eventName = name
                 eventLocationText = location
@@ -107,14 +105,14 @@ class UnifiedCreateEventFragment(private val onComplete: () -> Unit) : Fragment(
         clearContent()
 
         val teacherLabel = TextView(requireContext()).apply {
-            text = "Max Distance from Teacher (2–50m)"
+            text = "Max Distance from Teacher (10–50m)"
             textSize = 20f
             setTextColor(resources.getColor(android.R.color.white))
         }
 
         val teacherSeek = SeekBar(requireContext()).apply {
-            max = 48
-            progress = teacherRadius - 2
+            max = 40 // 10–50
+            progress = teacherRadius - 10
         }
 
         val teacherInput = EditText(requireContext()).apply {
@@ -126,14 +124,14 @@ class UnifiedCreateEventFragment(private val onComplete: () -> Unit) : Fragment(
         }
 
         val pairLabel = TextView(requireContext()).apply {
-            text = "Max Distance Between Groups (2–10m)"
+            text = "Max Distance Between Groups (10–20m)"
             textSize = 20f
             setTextColor(resources.getColor(android.R.color.white))
         }
 
         val pairSeek = SeekBar(requireContext()).apply {
-            max = 8
-            progress = pairDistance - 2
+            max = 10 // 10–20
+            progress = pairDistance - 10
         }
 
         val pairInput = EditText(requireContext()).apply {
@@ -151,10 +149,9 @@ class UnifiedCreateEventFragment(private val onComplete: () -> Unit) : Fragment(
             setTextColor(resources.getColor(android.R.color.white))
         }
 
-        // Sync teacher slider
         teacherSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, value: Int, fromUser: Boolean) {
-                teacherRadius = value + 2
+                teacherRadius = value + 10
                 teacherInput.setText(teacherRadius.toString())
             }
 
@@ -162,10 +159,9 @@ class UnifiedCreateEventFragment(private val onComplete: () -> Unit) : Fragment(
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        // Sync group slider
         pairSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, value: Int, fromUser: Boolean) {
-                pairDistance = value + 2
+                pairDistance = value + 10
                 pairInput.setText(pairDistance.toString())
             }
 
@@ -177,7 +173,6 @@ class UnifiedCreateEventFragment(private val onComplete: () -> Unit) : Fragment(
             loadStepThree()
         }
 
-        // Add to content
         content.addView(teacherLabel)
         content.addView(teacherSeek)
         content.addView(teacherInput)
@@ -211,7 +206,6 @@ class UnifiedCreateEventFragment(private val onComplete: () -> Unit) : Fragment(
         content.addView(checkboxContainer)
         content.addView(submitButton)
 
-        // 🟡 Use correct logic to load classes
         ApiClient.getClassesByTeacher(MainActivity.currentTeacherId) { classList ->
             classList.forEach { (classId, className) ->
                 requireActivity().runOnUiThread {
@@ -244,8 +238,7 @@ class UnifiedCreateEventFragment(private val onComplete: () -> Unit) : Fragment(
             radius, teacherRadius, pairDistance, pos.latitude, pos.longitude
         ) { geoId ->
             if (geoId == null) {
-                Toast.makeText(requireContext(), "Geofence creation failed", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(requireContext(), "Geofence creation failed", Toast.LENGTH_SHORT).show()
                 return@createGeoFence
             }
 
@@ -254,8 +247,7 @@ class UnifiedCreateEventFragment(private val onComplete: () -> Unit) : Fragment(
                 eventName, today, eventLocationText, MainActivity.currentTeacherId, geoId
             ) { eventId ->
                 if (eventId == null) {
-                    Toast.makeText(requireContext(), "Event creation failed", Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(requireContext(), "Event creation failed", Toast.LENGTH_SHORT).show()
                     return@createEvent
                 }
 
@@ -277,4 +269,3 @@ class UnifiedCreateEventFragment(private val onComplete: () -> Unit) : Fragment(
         }
     }
 }
-

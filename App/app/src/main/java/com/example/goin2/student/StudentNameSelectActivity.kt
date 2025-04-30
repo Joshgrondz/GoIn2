@@ -8,21 +8,21 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.goin2.API_and_location.ApiClient
+import com.example.goin2.API_and_location.LocationService
 import com.example.goin2.R
 import com.example.goin2.main.MainActivity
 import org.json.JSONArray
 
 class StudentNameSelectActivity : AppCompatActivity() {
 
-    private var eventName: String = "Unknown Event"  // 🔥 Added this to store event name properly
-    private val studentList = mutableListOf<Pair<Int, String>>() // (userId, fullName)
+    private var eventName: String = "Unknown Event"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_student_name_select)
 
         val eventId = intent.getIntExtra("eventId", -1)
-        eventName = intent.getStringExtra("eventName") ?: "Unknown Event" // 🔥 Pull event name here
+        eventName = intent.getStringExtra("eventName") ?: "Unknown Event"
 
         if (eventId == -1) {
             Toast.makeText(this, "Invalid event", Toast.LENGTH_SHORT).show()
@@ -34,7 +34,6 @@ class StudentNameSelectActivity : AppCompatActivity() {
         val studentListContainer = findViewById<LinearLayout>(R.id.studentListContainer)
 
         eventNameText.text = "Select Your Name"
-
         loadStudents(eventId, studentListContainer)
     }
 
@@ -105,18 +104,27 @@ class StudentNameSelectActivity : AppCompatActivity() {
         val loginButton = Button(this).apply {
             text = "Login"
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 0.3f)
-            setOnClickListener {
-                val intent = Intent(this@StudentNameSelectActivity, StudentActivity::class.java)
-                intent.putExtra("student_id", userId)
-                intent.putExtra("eventName", eventName)
 
-                // 🧠 Save important globals immediately
+            setOnClickListener {
+                // Save student identity globally
                 MainActivity.currentStudentId = userId
-                MainActivity.currentEventName = eventName  // 🔥 Now we have it set
                 MainActivity.currentStudentFirstName = firstName
                 MainActivity.currentStudentLastName = lastName
 
+                // Start foreground location service
+                val serviceIntent = Intent(this@StudentNameSelectActivity, LocationService::class.java).apply {
+                    putExtra("userId", userId)
+                    putExtra("userType", "student")
+                }
+                startForegroundService(serviceIntent)
+
+                // Transition to StudentActivity
+                val intent = Intent(this@StudentNameSelectActivity, StudentActivity::class.java).apply {
+                    putExtra("eventName", eventName)
+                }
+                MainActivity.currentEventName = eventName
                 startActivity(intent)
+
             }
         }
 

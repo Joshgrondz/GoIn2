@@ -71,7 +71,7 @@ class LocationService : Service() {
     private fun beginLocationTracking() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 40_000L).build()
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 20_000L).build()
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
